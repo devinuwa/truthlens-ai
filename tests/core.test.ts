@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { analyzeMessage } from "@/lib/analysis/message";
+import { BANK_OTP_EXAMPLE, demoMessageFor } from "@/lib/content/demo-message";
 import { analyzeUrl, UrlRejectedError } from "@/lib/analysis/url";
 import { scoreQuiz, getLesson } from "@/lib/academy/lessons";
 import { filterOpportunities } from "@/lib/opportunities/filter";
@@ -47,6 +48,18 @@ describe("message analysis", () => {
     const insult = result.indicators.find((item) => item.id === "insult");
     expect(insult?.evidence.toLowerCase()).not.toContain("stupid");
     expect(result.indicators.some((item) => item.id === "threat")).toBe(true);
+  });
+});
+
+describe("fictional bank example", () => {
+  it("contains no real code and still matches the existing message checks", () => {
+    expect(demoMessageFor("bank-otp")).toBe(BANK_OTP_EXAMPLE);
+    expect(demoMessageFor("other")).toBe("");
+    expect(BANK_OTP_EXAMPLE).not.toMatch(/\b\d{4,}\b/);
+    const result = analyzeMessage(BANK_OTP_EXAMPLE);
+    expect(result.assessment).toBe("suspicious_indicators_found");
+    expect(result.indicators.some((item) => item.id === "credential-request" || item.id === "urgency")).toBe(true);
+    expect(result.limitations.toLowerCase()).toContain("not proof");
   });
 });
 

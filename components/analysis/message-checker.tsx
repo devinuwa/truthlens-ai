@@ -16,8 +16,16 @@ const labels: Record<MessageCategory, string> = {
   manipulation: "Manipulation",
 };
 
-export function MessageChecker({ signedIn, compact = false }: { signedIn: boolean; compact?: boolean }) {
-  const [text, setText] = useState("");
+export function MessageChecker({
+  signedIn,
+  compact = false,
+  initialText = "",
+}: {
+  signedIn: boolean;
+  compact?: boolean;
+  initialText?: string;
+}) {
+  const [text, setText] = useState(initialText);
   const [category, setCategory] = useState<MessageCategory>("auto");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
