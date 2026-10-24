@@ -30,8 +30,18 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
+!.env.example
+
+# python model service
+ml/.venv/
+ml/data/raw/
+ml/models/*.joblib
+ml/models/*.json
+__pycache__/
+.pytest_cache/
+*.pyc
 
 # vercel
 .vercel
