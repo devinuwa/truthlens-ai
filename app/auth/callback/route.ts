@@ -5,6 +5,9 @@ import { safeNext } from "@/lib/security/safe-redirect";
 export async function GET(request: NextRequest) {
   const next = safeNext(request.nextUrl.searchParams.get("next"), "/home");
   const url = new URL(request.url);
+  if (url.searchParams.get("error")) {
+    return NextResponse.redirect(new URL("/login?error=gmail-cancelled", url.origin));
+  }
   const code = url.searchParams.get("code");
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=link-invalid", url.origin));

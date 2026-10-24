@@ -121,6 +121,7 @@ Never prefix the service-role key with `NEXT_PUBLIC_`.
 3. In the SQL editor, run `supabase/migrations/20261024120000_init.sql`, then `supabase/seed.sql`.
 4. In Authentication, decide whether new users must confirm email. The sign-up screen explains that step.
 5. Add `http://localhost:3000/auth/callback` to the redirect allow list. Add the Vercel URL as well when you deploy.
+6. For **Continue with Gmail**, open Authentication → Providers → Google and turn it on. In Google Cloud, create an OAuth client and set the authorised redirect to `https://<project-ref>.supabase.co/auth/v1/callback`. Paste that client id and secret into Supabase, not into this repository. The Next.js app does not need a Google key in `.env`.
 
 The migration enables RLS. Private tables compare `(select auth.uid())` with the owner column. Opportunities and lesson titles are publicly readable. There is no client insert policy on opportunities. A sample row cannot be marked `official_checked`.
 

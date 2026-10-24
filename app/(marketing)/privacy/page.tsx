@@ -11,6 +11,7 @@ export default function PrivacyPage() {
           <li>A saved report stores the result, the time, the category, the indicators, and an optional label. The message itself is stored only if you tick that option, and then only a short excerpt.</li>
           <li>Reports and saved opportunities are private to the signed-in account. There is no public profile or leaderboard.</li>
           <li>The app does not ask for your school, phone number, or exact location.</li>
+          <li>Continue with Gmail asks Google for the name and email on the account you choose. TruthLens does not receive the Gmail password.</li>
           <li>There is no advertising tracker in this project.</li>
           <li>If the operator sets a model-service address, the text or link you check is also sent to that service. Leave it unset to keep checks inside this app.</li>
         </ul>

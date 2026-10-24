@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createBrowserSupabase } from "@/lib/supabase/client";
@@ -12,7 +13,7 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
   const [displayName, setDisplayName] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState<"form" | "gmail" | null>(null);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -27,7 +28,7 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
       setError("Sign-in needs a Supabase project. Add the URL and anon key in .env.local, then restart the app.");
       return;
     }
-    setLoading(true);
+    setBusy("form");
     try {
       if (mode === "signup") {
         const { error: signUpError } = await supabase.auth.signUp({
@@ -53,11 +54,52 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
       router.push(nextPath);
       router.refresh();
     } finally {
-      setLoading(false);
+      setBusy(null);
+    }
+  }
+
+  async function continueWithGmail() {
+    setError("");
+    setMessage("");
+    const supabase = createBrowserSupabase();
+    if (!supabase) {
+      setError("Sign-in needs a Supabase project. Add the URL and anon key in .env.local, then restart the app.");
+      return;
+    }
+    setBusy("gmail");
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+        queryParams: { prompt: "select_account" },
+      },
+    });
+    if (oauthError) {
+      setError(
+        oauthError.message.toLowerCase().includes("not enabled")
+          ? "Gmail sign-in is not switched on in Supabase yet. Use email and a password, or enable the Google provider."
+          : oauthError.message,
+      );
+      setBusy(null);
     }
   }
 
   return (
+    <div className="space-y-4">
+      <Button type="button" variant="secondary" className="w-full" onClick={continueWithGmail} disabled={busy !== null}>
+        <Mail aria-hidden="true" size={18} />
+        {busy === "gmail" ? "Opening Gmail…" : "Continue with Gmail"}
+      </Button>
+      <p className="text-sm text-muted">
+        This opens Google so you can choose a Gmail account. TruthLens receives the name and email Google shares. It does not receive your Gmail password.
+      </p>
+      {error ? (
+        <p role="alert" className="text-sm font-semibold text-danger">
+          {error}
+        </p>
+      ) : null}
+      {message ? <p className="text-sm">{message}</p> : null}
+      <p className="text-center text-sm text-muted">or use email</p>
     <form onSubmit={onSubmit} className="space-y-4">
       {mode === "signup" ? (
         <Field id="display-name" label="What should we call you?" value={displayName} onChange={setDisplayName} autoComplete="nickname" />
@@ -72,16 +114,11 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
         autoComplete={mode === "signup" ? "new-password" : "current-password"}
         required
       />
-      <Button type="submit" disabled={loading}>
-        {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
+      <Button type="submit" disabled={busy !== null}>
+        {busy === "form" ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </Button>
-      {error ? (
-        <p role="alert" className="text-sm font-semibold text-danger">
-          {error}
-        </p>
-      ) : null}
-      {message ? <p className="text-sm">{message}</p> : null}
     </form>
+    </div>
   );
 }
 

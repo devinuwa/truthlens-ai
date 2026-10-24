@@ -161,6 +161,7 @@ describe("security review of the repository text", () => {
     expect(sql).toContain("(select auth.uid()) = user_id");
     expect(sql).toContain("(select auth.uid()) = id");
     expect(sql).toContain("sample_not_marked_official");
+    expect(sql).toContain("full_name");
   });
 
   it("does not fetch user-supplied urls from the checker", () => {

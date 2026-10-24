@@ -24,6 +24,9 @@ export default async function LoginPage({
       {params.error === "link-invalid" ? (
         <p className="mt-4 rounded-2xl bg-coral/30 p-3 text-sm">That confirmation link could not be used. Request a new one from the sign-up page.</p>
       ) : null}
+      {params.error === "gmail-cancelled" ? (
+        <p className="mt-4 rounded-2xl bg-sun/70 p-3 text-sm">Gmail sign-in did not finish. You can try again, or use email and a password.</p>
+      ) : null}
       <div className="mt-6">
         <AuthForm mode="login" nextPath={nextPath} />
       </div>
