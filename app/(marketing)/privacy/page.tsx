@@ -13,7 +13,8 @@ export default function PrivacyPage() {
           <li>The app does not ask for your school, phone number, or exact location.</li>
           <li>Continue with Gmail asks Google for the name and email on the account you choose. TruthLens does not receive the Gmail password.</li>
           <li>There is no advertising tracker in this project.</li>
-          <li>If the operator sets a model-service address, the text or link you check is also sent to that service. Leave it unset to keep checks inside this app.</li>
+          <li>If a Gemini API key is set on the server, the message or link you check is sent to Google's Gemini API so Gemma 4 can add a separate reading. TruthLens does not store that text from a guest check. Google handles the request under its own terms. The Gmail sign-in setup uses a different Google credential, and that credential is not the Gemma key.</li>
+          <li>If the operator sets a model-service address instead, the text or link you check is sent to that service. Leave both unset to keep checks inside this app.</li>
         </ul>
         <p>
           Signed-in users can delete reports. Supabase stores the account email so you can sign in. This project cannot promise absolute confidentiality beyond what the hosting and database providers provide.

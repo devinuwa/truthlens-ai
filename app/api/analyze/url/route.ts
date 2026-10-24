@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const maxDuration = 60;
 import { askUrlModel } from "@/lib/analysis/model-client";
 import { analyzeUrl, UrlRejectedError } from "@/lib/analysis/url";
 import { clientKeyFromHeaders, takeRateLimit } from "@/lib/security/rate-limit";

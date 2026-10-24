@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const maxDuration = 60;
 import { analyzeMessage } from "@/lib/analysis/message";
 import { askMessageModel } from "@/lib/analysis/model-client";
 import { clientKeyFromHeaders, takeRateLimit } from "@/lib/security/rate-limit";

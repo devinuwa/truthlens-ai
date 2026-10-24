@@ -125,7 +125,7 @@ export function ResultPanel({
       <section className="rounded-3xl bg-sun/40 p-5 text-sm">
         <h3 className="font-bold">Model note</h3>
         <p className="mt-2">
-          Status: {result.model.status}
+          {modelStatusLabel(result.model.status)}
           {typeof result.model.score === "number" ? ` · score ${result.model.score.toFixed(2)}` : ""}
           {result.model.label ? ` · ${result.model.label}` : ""}
         </p>
@@ -194,4 +194,10 @@ export function ResultPanel({
       </section>
     </div>
   );
+}
+
+function modelStatusLabel(status: AnalysisResult["model"]["status"]): string {
+  if (status === "scored") return "Separate reading";
+  if (status === "error") return "Could not be used";
+  return "Not connected";
 }

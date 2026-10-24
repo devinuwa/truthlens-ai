@@ -89,7 +89,7 @@ const sources = [
 function PrivacyNote() {
   return (
     <p className="rounded-2xl bg-sun/70 p-4 text-sm leading-6">
-      Your safety matters. Never paste your password, full card details, OTP, or unnecessary identity information into an analysis tool.{" "}
+      Your safety matters. Never paste your password, full card details, OTP, or unnecessary identity information into an analysis tool. When Gemma 4 is switched on, the text you submit is sent to Google for a separate reading.{" "}
       <Link href="/privacy" className="font-semibold text-primary">
         Read the privacy notice
       </Link>{" "}

@@ -1,21 +1,32 @@
-import { getMlUrl } from "@/lib/env";
+import { askGemma, gemmaModelId } from "@/lib/analysis/gemma";
 import type { ModelNote } from "@/lib/analysis/types";
+import { getGeminiApiKey, getGemmaModelOverride, getMlUrl } from "@/lib/env";
 
 const UNAVAILABLE: ModelNote = {
   status: "unavailable",
-  note: "The optional model service is not configured. This result uses the transparent checks only.",
+  note: "Gemma 4 is not connected because no Gemini API key is set on the server. This result uses the transparent checks only.",
 };
 
 export async function askMessageModel(text: string): Promise<ModelNote> {
+  const gemma = await askConfiguredGemma("message", text);
+  if (gemma) return gemma;
   const base = getMlUrl();
   if (!base) return UNAVAILABLE;
   return callModel(base, "/analyze-message", { text });
 }
 
 export async function askUrlModel(url: string): Promise<ModelNote> {
+  const gemma = await askConfiguredGemma("url", url);
+  if (gemma) return gemma;
   const base = getMlUrl();
   if (!base) return UNAVAILABLE;
   return callModel(base, "/analyze-url", { url });
+}
+
+async function askConfiguredGemma(kind: "message" | "url", value: string): Promise<ModelNote | null> {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) return null;
+  return askGemma(apiKey, kind, value, gemmaModelId(getGemmaModelOverride()));
 }
 
 async function callModel(base: string, path: string, body: Record<string, string>): Promise<ModelNote> {

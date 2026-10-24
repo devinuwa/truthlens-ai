@@ -26,7 +26,7 @@ Young people receive scholarship offers, job messages, login warnings, and press
 - Lets a signed-in user save and delete private reports, and save opportunities.
 - Lets a guest try the checks, lessons, and demonstration opportunities without an account.
 
-A machine-learning score is optional. Until a model file has been trained from a licensed dataset, the service says the model is unavailable. The rule checks still run.
+A separate Gemma 4 reading is optional. Set `GEMINI_API_KEY` on the server and the check sends the submitted text to Google's Gemini API. The rule checks still run and are not replaced by that reading. The older Python service stays unused until a model file is trained.
 
 ## What is not claimed
 
@@ -57,7 +57,8 @@ Do not add invented pictures. Capture these from a running app and save them und
 | Accounts, private reports, bookmarks | Implemented when Supabase is configured |
 | Row Level Security migration | Written and covered by a policy test. Not executed against a hosted database in this build |
 | Opportunity admin insert | Implemented for emails listed in `ADMIN_EMAILS`, using the service role |
-| Python model service | Implemented. Returns “unavailable” until you train a model |
+| Gemma 4 reading | Implemented when `GEMINI_API_KEY` is set. Shown separately from the rule checks |
+| Python model service | Implemented. Used only when Gemma is not configured. Returns “unavailable” until you train a model |
 | Live threat-intelligence lookup | Not implemented. No third-party URL is fetched |
 | Automated scraping of scholarships | Not implemented |
 
@@ -109,7 +110,9 @@ Open `http://localhost:3000`. Guest checks work with the environment file left b
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser and server | Supabase anon key. RLS still applies |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only | Admin inserts of opportunities. Bypasses RLS |
 | `ADMIN_EMAILS` | Server only | Comma-separated emails allowed to add opportunities |
-| `TRUTHLENS_ML_URL` | Server only | Optional model service. Checked text is sent there |
+| `TRUTHLENS_ML_URL` | Server only | Optional Python model service. Checked text is sent there when Gemma is not configured |
+| `GEMINI_API_KEY` | Server only | Google AI Studio key. Checked text is sent to the Gemini API for a Gemma 4 reading |
+| `GOOGLE_GEMMA_MODEL` | Server only | `gemma-4-26b-a4b-it` (default) or `gemma-4-31b-it` |
 | `NEXT_PUBLIC_SITE_URL` | Browser | Public site URL, used in docs and redirects |
 
 Never prefix the service-role key with `NEXT_PUBLIC_`.
@@ -121,7 +124,8 @@ Never prefix the service-role key with `NEXT_PUBLIC_`.
 3. In the SQL editor, run `supabase/migrations/20261024120000_init.sql`, then `supabase/seed.sql`.
 4. In Authentication, decide whether new users must confirm email. The sign-up screen explains that step.
 5. Add `http://localhost:3000/auth/callback` to the redirect allow list. Add the Vercel URL as well when you deploy.
-6. For **Continue with Gmail**, open Authentication → Providers → Google and turn it on. In Google Cloud, create an OAuth client and set the authorised redirect to `https://<project-ref>.supabase.co/auth/v1/callback`. Paste that client id and secret into Supabase, not into this repository. The Next.js app does not need a Google key in `.env`.
+6. For **Continue with Gmail**, open Authentication → Providers → Google and turn it on. In Google Cloud, create an OAuth client and set the authorised redirect to `https://<project-ref>.supabase.co/auth/v1/callback`. Paste that client id and secret into Supabase, not into this repository. Gmail sign-in does not use `GEMINI_API_KEY`.
+7. For the Gemma 4 reading, create an API key in Google AI Studio and put it in `GEMINI_API_KEY`. That key stays on the server. Do not prefix it with `NEXT_PUBLIC_`.
 
 The migration enables RLS. Private tables compare `(select auth.uid())` with the owner column. Opportunities and lesson titles are publicly readable. There is no client insert policy on opportunities. A sample row cannot be marked `official_checked`.
 

@@ -20,6 +20,16 @@ export function getMlUrl(): string | null {
   return value || null;
 }
 
+export function getGeminiApiKey(): string | null {
+  const value = process.env.GEMINI_API_KEY?.trim();
+  return value || null;
+}
+
+export function getGemmaModelOverride(): string | null {
+  const value = process.env.GOOGLE_GEMMA_MODEL?.trim();
+  return value || null;
+}
+
 export function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")
     .split(",")
