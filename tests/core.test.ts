@@ -9,6 +9,7 @@ import { filterOpportunities } from "@/lib/opportunities/filter";
 import { SAMPLE_OPPORTUNITIES } from "@/lib/opportunities/sample-data";
 import { ownedReportScope } from "@/lib/reports/repository";
 import { resetRateLimits, takeRateLimit } from "@/lib/security/rate-limit";
+import { authCallbackUrl, nextPathFrom } from "@/lib/auth/callback-url";
 import { safeNext } from "@/lib/security/safe-redirect";
 import { isAdminEmail } from "@/lib/env";
 
@@ -134,6 +135,21 @@ describe("access control helpers", () => {
   it("scopes a report delete to the signed-in user", () => {
     expect(ownedReportScope("user-a", "report-1").filters).toEqual({ user_id: "user-a", id: "report-1" });
     expect(() => ownedReportScope("")).toThrow();
+  });
+
+  it("keeps the Gmail callback on the current site, with no extra query", () => {
+    expect(authCallbackUrl("https://truthlens-ai-one-iota.vercel.app")).toBe(
+      "https://truthlens-ai-one-iota.vercel.app/auth/callback",
+    );
+    expect(authCallbackUrl("http://localhost:3000")).toBe("http://localhost:3000/auth/callback");
+    expect(authCallbackUrl("https://truthlens-ai-one-iota.vercel.app")).not.toContain("?");
+  });
+
+  it("reads the page to open after sign-in from the query or the cookie", () => {
+    expect(nextPathFrom("/reports", "%2Fhome")).toBe("/reports");
+    expect(nextPathFrom(null, "%2Fcheck-message")).toBe("/check-message");
+    expect(nextPathFrom(null, "https%3A%2F%2Fevil.example")).toBe("/home");
+    expect(nextPathFrom(null, null)).toBe("/home");
   });
 
   it("allows only relative redirect targets", () => {

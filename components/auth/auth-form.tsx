@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import { Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { NEXT_COOKIE, authCallbackUrl } from "@/lib/auth/callback-url";
+import { safeNext } from "@/lib/security/safe-redirect";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
 export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPath: string }) {
@@ -14,6 +16,11 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<"form" | "gmail" | null>(null);
+
+  function callbackUrl() {
+    rememberNext(nextPath);
+    return authCallbackUrl(window.location.origin);
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -36,7 +43,7 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
           password,
           options: {
             data: { display_name: displayName || email.split("@")[0] },
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+            emailRedirectTo: callbackUrl(),
           },
         });
         if (signUpError) {
@@ -70,7 +77,7 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+        redirectTo: callbackUrl(),
         queryParams: { prompt: "select_account" },
       },
     });
@@ -120,6 +127,12 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
     </form>
     </div>
   );
+}
+
+function rememberNext(nextPath: string) {
+  const value = encodeURIComponent(safeNext(nextPath));
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${NEXT_COOKIE}=${value}; Path=/; Max-Age=600; SameSite=Lax${secure}`;
 }
 
 function Field({
