@@ -142,7 +142,7 @@ describe("Gemma 4 reading", () => {
 
   it("shows a separate reading and drops a claim that the message is safe", () => {
     const note = interpretGemmaText(
-      '{"noticed":true,"signs":["Asks for an OTP","OTP 123456"],"limit":"This message is completely safe."}',
+      '{"noticed":true,"signs":["Asks for an OTP","OTP 123456"],"limit":"one short sentence. This message is completely safe."}',
       "message",
       "gemma-4-26b-a4b-it",
     );
@@ -152,6 +152,7 @@ describe("Gemma 4 reading", () => {
     expect(note.note).toContain("Asks for an OTP");
     expect(note.note).not.toContain("123456");
     expect(note.note.toLowerCase()).not.toContain("completely safe");
+    expect(note.note.toLowerCase()).not.toContain("one short sentence");
     expect(note.note.toLowerCase()).toContain("not proof");
   });
 
