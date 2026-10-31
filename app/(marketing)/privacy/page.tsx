@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           <li>The app does not ask for your school, phone number, or exact location.</li>
           <li>Continue with Gmail asks Google for the name and email on the account you choose. TruthLens does not receive the Gmail password.</li>
           <li>There is no advertising tracker in this project.</li>
-          <li>If a Gemini API key is set on the server, the message or link you check is sent to Google's Gemini API so Gemma 4 can add a separate reading. TruthLens does not store that text from a guest check. Google handles the request under its own terms. The Gmail sign-in setup uses a different Google credential, and that credential is not the Gemma key.</li>
+          <li>If a Gemini API key is set on the server, the message or link you check is sent to Google's Gemini API so Gemma 4 can explain the check. If a Groq key is set and selected instead, that text is sent to Groq. TruthLens does not store that text from a guest check. The provider handles the request under its own terms. The Gmail sign-in setup uses a different Google credential, and that credential is not the Gemma key.</li>
           <li>If the operator sets a model-service address instead, the text or link you check is sent to that service. Leave both unset to keep checks inside this app.</li>
         </ul>
         <p>

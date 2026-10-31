@@ -1,9 +1,18 @@
 import { z } from "zod";
 import { MESSAGE_CATEGORIES } from "@/lib/analysis/types";
 
+const answer = z.enum(["yes", "no", "unsure"]);
+
 export const messageRequestSchema = z.object({
   text: z.string().trim().min(1, "Paste a message first.").max(4000, "That message is too long. Use 4000 characters or fewer."),
   category: z.enum(MESSAGE_CATEGORIES).default("auto"),
+  context: z.object({
+    channel: z.enum(["sms", "whatsapp", "email", "social", "in_person", "other", "unknown"]).optional(),
+    expected: answer.optional(),
+    knowsSender: answer.optional(),
+    alreadyPaid: answer.optional(),
+    alreadySharedSecret: answer.optional(),
+  }).optional(),
 });
 
 export const urlRequestSchema = z.object({

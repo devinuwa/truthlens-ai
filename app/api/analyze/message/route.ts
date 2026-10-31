@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 import { analyzeMessage } from "@/lib/analysis/message";
-import { askMessageModel } from "@/lib/analysis/model-client";
+import { explainAnalysis } from "@/lib/analysis/providers/explain";
 import { clientKeyFromHeaders, takeRateLimit } from "@/lib/security/rate-limit";
 import { issueMessages, messageRequestSchema } from "@/lib/validation/schemas";
 
@@ -32,8 +32,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const model = await askMessageModel(parsed.data.text);
-    const result = analyzeMessage(parsed.data.text, parsed.data.category, model);
+    const checked = analyzeMessage(parsed.data.text, parsed.data.category, undefined, parsed.data.context);
+    const result = await explainAnalysis(parsed.data.text, checked);
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: "The check could not be completed." }, { status: 500 });

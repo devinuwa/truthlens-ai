@@ -19,7 +19,7 @@ describe("message analysis", () => {
     const result = analyzeMessage("hi");
     expect(result.assessment).toBe("insufficient_evidence");
     expect(result.indicators).toHaveLength(0);
-    expect(result.assessmentLabel).toBe("Insufficient evidence");
+    expect(result.assessmentLabel).toBe("Uncertain");
   });
 
   it("stays quiet on an ordinary note and still refuses a safety certificate", () => {

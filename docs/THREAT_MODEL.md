@@ -41,7 +41,7 @@
 - The in-memory rate limit resets on each server instance. It is not a global quota.
 - RLS has not been executed against a live project in this build. Apply the migration and test with two users.
 - If `TRUTHLENS_ML_URL` points at a server you do not control, message text leaves this app.
-- If `GEMINI_API_KEY` is set, the checked message or link is sent to Google's Gemini API for the Gemma 4 reading. The key must stay server-side.
+- If `GEMINI_API_KEY` is set, the checked message or link is sent to Google's Gemini API for the Gemma 4 reading. If `GROQ_API_KEY` is set and selected, the text is sent to Groq instead. Those keys must stay server-side. A failed reading is shown as an error. The page does not invent an AI result.
 - Rules can miss a new scam or flag a harmless sentence.
 - A stolen session cookie can act as the user until it expires. Supabase cookie options are the session boundary.
 - This app cannot promise confidentiality beyond the hosts you configure.

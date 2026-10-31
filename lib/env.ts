@@ -30,6 +30,16 @@ export function getGemmaModelOverride(): string | null {
   return value || null;
 }
 
+export function getGroqApiKey(): string | null {
+  const value = process.env.GROQ_API_KEY?.trim();
+  return value || null;
+}
+
+export function getGroqModelOverride(): string | null {
+  const value = process.env.GROQ_MODEL?.trim();
+  return value || null;
+}
+
 export function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")
     .split(",")

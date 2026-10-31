@@ -26,7 +26,7 @@ Young people receive scholarship offers, job messages, login warnings, and press
 - Lets a signed-in user save and delete private reports, and save opportunities.
 - Lets a guest try the checks, lessons, and demonstration opportunities without an account.
 
-A separate Gemma 4 reading is optional. Set `GEMINI_API_KEY` on the server and the check sends the submitted text to Google's Gemini API. The rule checks still run and are not replaced by that reading. The older Python service stays unused until a model file is trained.
+The message check decides the risk from the wording. An optional AI reading explains that evidence and does not replace it. Set `GEMINI_API_KEY` to use Gemma 4 through Google's Gemini API, or `GROQ_API_KEY` with `TRUTHLENS_AI_PROVIDER=groq`. The text you check is sent to that provider. If the reading fails, the page says so and keeps the built-in assessment.
 
 ## What is not claimed
 
@@ -113,6 +113,9 @@ Open `http://localhost:3000`. Guest checks work with the environment file left b
 | `TRUTHLENS_ML_URL` | Server only | Optional Python model service. Checked text is sent there when Gemma is not configured |
 | `GEMINI_API_KEY` | Server only | Google AI Studio key. Checked text is sent to the Gemini API for a Gemma 4 reading |
 | `GOOGLE_GEMMA_MODEL` | Server only | `gemma-4-26b-a4b-it` (default) or `gemma-4-31b-it` |
+| `GROQ_API_KEY` | Server only | Groq key. Used when selected, or when no Gemini key is set |
+| `GROQ_MODEL` | Server only | Default `llama-3.3-70b-versatile`. Unknown ids fall back to that model |
+| `TRUTHLENS_AI_PROVIDER` | Server only | `auto` (default), `gemini`, or `groq` |
 | `NEXT_PUBLIC_SITE_URL` | Browser | Public site URL, used in docs and redirects |
 
 Never prefix the service-role key with `NEXT_PUBLIC_`.

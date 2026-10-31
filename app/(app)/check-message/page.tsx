@@ -18,7 +18,7 @@ export default async function CheckMessagePage({
     <Card>
       <h1 className="text-3xl font-bold">Check a message</h1>
       <p className="mt-2 text-sm text-muted">
-        This looks for scam language, phishing requests, fake opportunities, payment asks, urgency, harassment, and manipulation. It explains the patterns it finds. It does not prove a crime, and a quiet result does not mean the message is safe.
+        Paste or type a message. TruthLens looks at what it asks you to do, then explains the warning signs it can actually see. An uncertain result means there is not enough to judge. A low-risk result still does not prove the sender is real.
       </p>
       {initialText ? (
         <p className="mt-3 rounded-2xl bg-sun/70 p-3 text-sm">
