@@ -28,6 +28,8 @@ Young people receive scholarship offers, job messages, login warnings, and press
 
 The message check decides the risk from the wording. An optional AI reading explains that evidence and does not replace it. Set `GEMINI_API_KEY` to use Gemma 4 through Google's Gemini API, or `GROQ_API_KEY` with `TRUTHLENS_AI_PROVIDER=groq`. The text you check is sent to that provider. If the reading fails, the page says so and keeps the built-in assessment.
 
+A screenshot (PNG, JPG, or WEBP, up to 5 MB, up to 3 images) or a PDF (up to 10 MB and 5 pages) uses the same check after the words are read. PDF text is extracted on the server. A screenshot, and a picture taken from a page that is mostly an image, is sent to Gemini to copy the visible words. The PDF file itself is not sent. The file is not stored and has no public address. The same Gemini key is required for that reading. On Vercel Hobby, the platform may reject a request body over about 4.5 MB before this app sees it.
+
 ## What is not claimed
 
 - No accuracy percentage is published, because a held-out evaluation has not been run on a licensed dataset in this repository.
@@ -126,7 +128,7 @@ Never prefix the service-role key with `NEXT_PUBLIC_`.
 2. Put the project URL and anon key in `.env.local`.
 3. In the SQL editor, run `supabase/migrations/20261024120000_init.sql`, then `supabase/seed.sql`.
 4. In Authentication, decide whether new users must confirm email. The sign-up screen explains that step.
-5. Add `http://localhost:3000/auth/callback` to the redirect allow list. Add the Vercel URL as well when you deploy.
+5. Add `http://localhost:3000/auth/callback` and `https://thetruthlenai.vercel.app/auth/callback` to the redirect allow list. Set the Supabase Site URL to `https://thetruthlenai.vercel.app`.
 6. For **Continue with Gmail**, open Authentication → Providers → Google and turn it on. In Google Cloud, create an OAuth client and set the authorised redirect to `https://<project-ref>.supabase.co/auth/v1/callback`. Paste that client id and secret into Supabase, not into this repository. Gmail sign-in does not use `GEMINI_API_KEY`.
 7. For the Gemma 4 reading, create an API key in Google AI Studio and put it in `GEMINI_API_KEY`. That key stays on the server. Do not prefix it with `NEXT_PUBLIC_`.
 

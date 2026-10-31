@@ -1,9 +1,13 @@
 import Link from "next/link";
 
 const links = [
+  { href: "/#check", label: "Check" },
+  { href: "/academy", label: "Academy" },
+  { href: "/opportunities", label: "Opportunities" },
   { href: "/about", label: "About" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
+  { href: "https://github.com/devinuwa/truthlens-ai/issues", label: "Contact" },
   { href: "https://github.com/devinuwa/truthlens-ai", label: "GitHub" },
   { href: "https://github.com/devinuwa/truthlens-ai/blob/main/LICENSE", label: "MIT licence" },
 ];

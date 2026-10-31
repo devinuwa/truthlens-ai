@@ -7,7 +7,7 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
       <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
         <Shield aria-hidden="true" size={22} />
       </span>
-      {compact ? <span className="sr-only">TruthLens AI</span> : <span>TruthLens AI</span>}
+      {compact ? <span className="sr-only">TruthLens AI</span> : <span className="whitespace-nowrap">TruthLens AI</span>}
     </span>
   );
 }
