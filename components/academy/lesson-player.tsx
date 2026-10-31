@@ -1,42 +1,82 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { scoreQuiz, type Lesson } from "@/lib/academy/lessons";
+import type { PublicLesson } from "@/lib/academy/curriculum";
 
-const STORAGE_KEY = "truthlens.lessonProgress";
+type Feedback = {
+  score: number;
+  total: number;
+  passed: boolean;
+  correct: boolean[];
+  explanations: string[];
+  stored: boolean;
+  note: string;
+  nextSlug: string | null;
+  nextTitle: string | null;
+};
 
-export function LessonPlayer({ lesson, signedIn }: { lesson: Lesson; signedIn: boolean }) {
+export function LessonPlayer({
+  lesson,
+  signedIn,
+  passPercent,
+  previous,
+  nextLockedTitle,
+}: {
+  lesson: PublicLesson;
+  signedIn: boolean;
+  passPercent: number;
+  previous: { slug: string; title: string } | null;
+  nextLockedTitle: string | null;
+}) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<number[]>(lesson.questions.map(() => -1));
-  const [submitted, setSubmitted] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [note, setNote] = useState("");
-
-  const result = submitted ? scoreQuiz(lesson, answers) : null;
+  const [busy, setBusy] = useState(false);
 
   async function finish() {
     if (answers.some((answer) => answer < 0)) {
       setNote("Answer every question first.");
       return;
     }
-    const scored = scoreQuiz(lesson, answers);
-    setSubmitted(true);
-    const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "{}") as Record<string, number>;
-    stored[lesson.slug] = scored.score;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-    if (!signedIn) {
-      setNote("Completed on this device. Sign in if you want the score stored on your account.");
-      return;
+    setBusy(true);
+    setNote("");
+    try {
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ lessonSlug: lesson.slug, answers }),
+      });
+      const payload = (await response.json()) as Feedback & { error?: string };
+      if (!response.ok) {
+        setNote(payload.error ?? "The quiz could not be marked.");
+        return;
+      }
+      setFeedback(payload);
+      if (payload.stored) router.refresh();
+    } finally {
+      setBusy(false);
     }
-    const response = await fetch("/api/quiz", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ lessonSlug: lesson.slug, score: scored.score, total: scored.total }),
-    });
-    setNote(response.ok ? "Score saved to your account." : "The score is on this device, but it could not be saved to your account.");
+  }
+
+  function retry() {
+    setFeedback(null);
+    setAnswers(lesson.questions.map(() => -1));
+    setNote("");
   }
 
   return (
     <article className="space-y-5">
+      <nav aria-label="Lesson" className="flex flex-wrap gap-3 text-sm">
+        {previous ? (
+          <Link className="font-semibold text-primary" href={`/academy/${previous.slug}`}>
+            Previous: {previous.title}
+          </Link>
+        ) : null}
+      </nav>
       {lesson.sections.map((section) => (
         <section key={section.heading} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
           <h2 className="text-xl font-bold">{section.heading}</h2>
@@ -53,12 +93,16 @@ export function LessonPlayer({ lesson, signedIn }: { lesson: Lesson; signedIn: b
           ) : null}
         </section>
       ))}
-      <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
-        <h2 className="text-xl font-bold">Check your understanding</h2>
+      <a href="#quiz" className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 font-semibold text-white">
+        Take quiz
+      </a>
+      <section id="quiz" className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
+        <h2 className="text-xl font-bold">Quiz</h2>
+        <p className="mt-2 text-sm text-muted">A score of {passPercent}% opens the next lesson. You can try again if you miss it.</p>
         <ol className="mt-4 space-y-5">
           {lesson.questions.map((question, questionIndex) => (
             <li key={question.prompt}>
-              <fieldset>
+              <fieldset disabled={feedback !== null}>
                 <legend className="font-semibold">{question.prompt}</legend>
                 <div className="mt-2 space-y-2">
                   {question.choices.map((choice, choiceIndex) => (
@@ -78,24 +122,44 @@ export function LessonPlayer({ lesson, signedIn }: { lesson: Lesson; signedIn: b
                   ))}
                 </div>
               </fieldset>
-              {result ? (
-                <p className={`mt-2 text-sm ${result.correct[questionIndex] ? "text-teal" : "text-danger"}`}>
-                  {result.correct[questionIndex] ? "Matched the safer choice." : "Not the safer choice."} {question.explanation}
+              {feedback ? (
+                <p className={`mt-2 text-sm ${feedback.correct[questionIndex] ? "text-teal" : "text-danger"}`}>
+                  {feedback.correct[questionIndex] ? "Matched the safer choice." : "Not the safer choice."} {feedback.explanations[questionIndex]}
                 </p>
               ) : null}
             </li>
           ))}
         </ol>
-        <Button type="button" className="mt-4" onClick={() => void finish()} disabled={submitted}>
-          {submitted ? "Lesson checked" : "Check answers"}
-        </Button>
-        {result ? (
-          <p className="mt-3 font-semibold">
-            {result.score} of {result.total} safer choices. {result.score === result.total ? "Lesson complete." : "You can reread the lesson and try the ideas in real messages."}
+        {feedback ? (
+          <div className="mt-4 space-y-3">
+            <p className="font-semibold">
+              {feedback.score} of {feedback.total}. {feedback.passed ? "That is a pass." : `That is below ${passPercent}%. The next lesson stays locked.`}
+            </p>
+            <p className="text-sm text-muted">{feedback.note}</p>
+            {feedback.passed && feedback.nextSlug && feedback.nextTitle ? (
+              <Link className="inline-flex min-h-11 items-center font-semibold text-primary" href={`/academy/${feedback.nextSlug}`}>
+                Next: {feedback.nextTitle}
+              </Link>
+            ) : null}
+            {!feedback.passed ? (
+              <Button type="button" variant="secondary" onClick={retry}>
+                Try the quiz again
+              </Button>
+            ) : null}
+          </div>
+        ) : (
+          <Button type="button" className="mt-4" onClick={() => void finish()} disabled={busy}>
+            {busy ? "Marking…" : "Submit quiz"}
+          </Button>
+        )}
+        {note ? (
+          <p className="mt-2 text-sm font-semibold text-danger" role="alert">
+            {note}
           </p>
         ) : null}
-        {note ? <p className="mt-2 text-sm text-muted">{note}</p> : null}
+        {!signedIn ? <p className="mt-3 text-sm text-muted">Sign in before you submit if you want this attempt saved. A guest score does not open the next lesson.</p> : null}
       </section>
+      {nextLockedTitle ? <p className="text-sm text-muted">Next lesson: {nextLockedTitle}. It opens after you pass this quiz.</p> : null}
     </article>
   );
 }

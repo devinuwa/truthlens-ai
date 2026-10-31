@@ -59,8 +59,7 @@ export const opportunityWriteSchema = z.object({
 
 export const quizSubmitSchema = z.object({
   lessonSlug: z.string().trim().min(1).max(80),
-  score: z.number().int().min(0).max(20),
-  total: z.number().int().min(1).max(20),
+  answers: z.array(z.number().int().min(0).max(10)).min(1).max(20),
 });
 
 export function issueMessages(error: z.ZodError): string[] {

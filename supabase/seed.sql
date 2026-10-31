@@ -98,12 +98,12 @@ insert into public.opportunities (
 on conflict (slug) do nothing;
 
 insert into public.lessons (slug, title, summary, sort_order) values
-  ('spotting-phishing', 'Spotting phishing messages', 'Signs of a message that wants a password or login code.', 1),
-  ('suspicious-links', 'Recognising suspicious links', 'How to read a web address before opening it.', 2),
-  ('scholarship-job-scams', 'Avoiding scholarship and job scams', 'How to slow down when an offer asks for a fee or secrecy.', 3),
+  ('pressure-tactics', 'Recognising pressure and manipulation', 'Secrecy, flattery, and fake deadlines are tactics.', 1),
+  ('spotting-phishing', 'Spotting phishing messages', 'Signs of a message that wants a password or login code.', 2),
+  ('suspicious-links', 'Recognising suspicious links', 'How to read a web address before opening it.', 3),
   ('passwords-and-accounts', 'Protecting passwords and accounts', 'Keep passwords and login codes to yourself.', 4),
-  ('cyberbullying', 'Cyberbullying and reporting abuse', 'Leave a cruel conversation and ask for help.', 5),
-  ('pressure-tactics', 'Recognising pressure and manipulation', 'Secrecy, flattery, and fake deadlines are tactics.', 6),
+  ('scholarship-job-scams', 'Avoiding scholarship and job scams', 'How to slow down when an offer asks for a fee or secrecy.', 5),
+  ('cyberbullying', 'Cyberbullying and reporting abuse', 'Leave a cruel conversation and ask for help.', 6),
   ('verify-before-sharing', 'Verifying claims before you share them', 'Check the source before you pass a story on.', 7),
   ('personal-information', 'Protecting personal information online', 'Your school, address, identity numbers, and photos are worth protecting.', 8)
 on conflict (slug) do nothing;

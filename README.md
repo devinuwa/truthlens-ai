@@ -22,7 +22,7 @@ Young people receive scholarship offers, job messages, login warnings, and press
 - Checks pasted messages for scam language, phishing requests, fake opportunities, payment or identity asks, urgency, harassment, and manipulation.
 - Checks an `http` or `https` address for explainable structural warning signs, without opening the site.
 - Lists educational opportunities with provider, deadline, source, and verification labels. The built-in records are fictional demonstration data.
-- Offers eight short Academy lessons with questions and feedback.
+- Offers eight short Academy lessons in a path. The next lesson opens after a signed-in student passes the quiz. The passing score defaults to 80%.
 - Lets a signed-in user save and delete private reports, and save opportunities.
 - Lets a guest try the checks, lessons, and demonstration opportunities without an account.
 
