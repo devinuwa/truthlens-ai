@@ -128,7 +128,11 @@ Never prefix the service-role key with `NEXT_PUBLIC_`.
 2. Put the project URL and anon key in `.env.local`.
 3. In the SQL editor, run `supabase/migrations/20261024120000_init.sql`, then `supabase/seed.sql`.
 4. In Authentication, decide whether new users must confirm email. The sign-up screen explains that step.
-5. Add `http://localhost:3000/auth/callback` and `https://thetruthlenai.vercel.app/auth/callback` to the redirect allow list. Set the Supabase Site URL to `https://thetruthlenai.vercel.app`.
+5. Add `http://localhost:3000/auth/callback` and `https://truthlens-ai-one-iota.vercel.app/auth/callback` to the redirect allow list. Set the Supabase Site URL to `https://truthlens-ai-one-iota.vercel.app`. In Authentication → Emails → Confirm signup, point the link at the callback with the token hash so the link works from any device:
+
+   `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email`
+
+   The built-in sender only delivers a couple of these emails an hour. A real inbox is required; example addresses are rejected.
 6. For **Continue with Gmail**, open Authentication → Providers → Google and turn it on. In Google Cloud, create an OAuth client and set the authorised redirect to `https://<project-ref>.supabase.co/auth/v1/callback`. Paste that client id and secret into Supabase, not into this repository. Gmail sign-in does not use `GEMINI_API_KEY`.
 7. For the Gemma 4 reading, create an API key in Google AI Studio and put it in `GEMINI_API_KEY`. That key stays on the server. Do not prefix it with `NEXT_PUBLIC_`.
 

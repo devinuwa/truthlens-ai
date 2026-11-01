@@ -170,11 +170,11 @@ describe("access control helpers", () => {
   });
 
   it("keeps the Gmail callback on the current site, with no extra query", () => {
-    expect(authCallbackUrl("https://thetruthlenai.vercel.app")).toBe(
-      "https://thetruthlenai.vercel.app/auth/callback",
+    expect(authCallbackUrl("https://truthlens-ai-one-iota.vercel.app")).toBe(
+      "https://truthlens-ai-one-iota.vercel.app/auth/callback",
     );
     expect(authCallbackUrl("http://localhost:3000")).toBe("http://localhost:3000/auth/callback");
-    expect(authCallbackUrl("https://thetruthlenai.vercel.app")).not.toContain("?");
+    expect(authCallbackUrl("https://truthlens-ai-one-iota.vercel.app")).not.toContain("?");
   });
 
   it("reads the page to open after sign-in from the query or the cookie", () => {

@@ -22,7 +22,14 @@ export default async function LoginPage({
         </p>
       ) : null}
       {params.error === "link-invalid" ? (
-        <p className="mt-4 rounded-2xl bg-coral/30 p-3 text-sm">That confirmation link could not be used. Request a new one from the sign-up page.</p>
+        <p className="mt-4 rounded-2xl bg-coral/30 p-3 text-sm">
+          That confirmation link could not be used. Sign in with your email and password and we will send a new one.
+        </p>
+      ) : null}
+      {params.error === "link-expired" ? (
+        <p className="mt-4 rounded-2xl bg-coral/30 p-3 text-sm">
+          That confirmation link has expired. Sign in with your email and password and we will send a new one.
+        </p>
       ) : null}
       {params.error === "gmail-cancelled" ? (
         <p className="mt-4 rounded-2xl bg-sun/70 p-3 text-sm">Gmail sign-in did not finish. You can try again, or use email and a password.</p>

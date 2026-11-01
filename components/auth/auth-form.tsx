@@ -38,7 +38,7 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
     setBusy("form");
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -47,15 +47,39 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
           },
         });
         if (signUpError) {
-          setError(signUpError.message);
+          setError(plainAuthError(signUpError.message));
           return;
         }
-        setMessage("Account created. If email confirmation is on, open the link in your inbox, then sign in.");
+        if (data.session) {
+          router.push(nextPath);
+          router.refresh();
+          return;
+        }
+        if (data.user && (data.user.identities?.length ?? 0) === 0) {
+          setError("This email already has an account. Sign in with it instead.");
+          return;
+        }
+        setMessage(checkEmailMessage(email));
         return;
       }
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
-        setError(signInError.message);
+        const unconfirmed =
+          signInError.code === "email_not_confirmed" || signInError.message.toLowerCase().includes("not confirmed");
+        if (unconfirmed) {
+          const { error: resendError } = await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: { emailRedirectTo: callbackUrl() },
+          });
+          if (resendError) {
+            setError(plainAuthError(resendError.message));
+            return;
+          }
+          setMessage(checkEmailMessage(email));
+          return;
+        }
+        setError(plainAuthError(signInError.message));
         return;
       }
       router.push(nextPath);
@@ -100,14 +124,8 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
       <p className="text-sm text-muted">
         This opens Google so you can choose a Gmail account. TruthLens receives the name and email Google shares. It does not receive your Gmail password.
       </p>
-      {error ? (
-        <p role="alert" className="text-sm font-semibold text-danger">
-          {error}
-        </p>
-      ) : null}
-      {message ? <p className="text-sm">{message}</p> : null}
       <p className="text-center text-sm text-muted">or use email</p>
-    <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
       {mode === "signup" ? (
         <Field id="display-name" label="What should we call you?" value={displayName} onChange={setDisplayName} autoComplete="nickname" />
       ) : null}
@@ -121,12 +139,37 @@ export function AuthForm({ mode, nextPath }: { mode: "login" | "signup"; nextPat
         autoComplete={mode === "signup" ? "new-password" : "current-password"}
         required
       />
+      {error ? (
+        <p role="alert" className="rounded-2xl bg-coral/30 p-3 text-sm font-semibold text-danger">
+          {error}
+        </p>
+      ) : null}
+      {message ? (
+        <p role="status" className="rounded-2xl bg-sun/70 p-3 text-sm">
+          {message}
+        </p>
+      ) : null}
       <Button type="submit" disabled={busy !== null}>
         {busy === "form" ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </Button>
     </form>
     </div>
   );
+}
+
+function checkEmailMessage(email: string) {
+  return `Check ${email} for a message from TruthLens. Open the link, then come back and sign in. If it does not arrive, look in spam and wait a few minutes before trying again.`;
+}
+
+function plainAuthError(message: string) {
+  const text = message.toLowerCase();
+  if (text.includes("invalid") && text.includes("email")) {
+    return "That email address is not accepted. Use a real inbox, such as Gmail.";
+  }
+  if (text.includes("rate limit") || text.includes("too many")) {
+    return "Too many account emails were sent. Wait about an hour, then try again.";
+  }
+  return message;
 }
 
 function rememberNext(nextPath: string) {
