@@ -9,16 +9,20 @@ import { ASSESSMENT_DISCLAIMER, type AnalysisResult, type RiskLevel } from "@/li
 export function ResultPanel({
   result,
   sourceText,
+  sourceKind = "message",
   signedIn,
   resetHref,
+  fullCheckerLabel = "Open the full checker",
   resetLabel,
   onReset,
   onRetry,
 }: {
   result: AnalysisResult;
   sourceText: string;
+  sourceKind?: "message" | "url" | "file";
   signedIn: boolean;
   resetHref: string;
+  fullCheckerLabel?: string;
   resetLabel: string;
   onReset: () => void;
   onRetry?: () => void;
@@ -66,7 +70,7 @@ export function ResultPanel({
           {resetLabel}
         </Button>
         <ButtonLink href={resetHref} variant="ghost">
-          Open the full checker
+          {fullCheckerLabel}
         </ButtonLink>
       </div>
 
@@ -99,8 +103,12 @@ export function ResultPanel({
                 onChange={(event) => setStoreSource(event.target.checked)}
               />
               <span>
-                Also store a short excerpt of what I pasted. This is optional. The excerpt stays on your account until
-                you delete the report. Leave this unticked to save only the result.
+                {sourceKind === "file"
+                  ? "Also store a short excerpt of the words read from the file."
+                  : sourceKind === "url"
+                    ? "Also store the address I checked."
+                    : "Also store a short excerpt of what I pasted."}{" "}
+                This is optional. It stays on your account until you delete the report. Leave this unticked to save only the result.
               </span>
             </label>
             <Button type="submit" disabled={saveState === "saving"}>

@@ -47,7 +47,14 @@ export function OpportunityBrowser({
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    if (!signedIn) setSavedIds(readLocal());
+    if (signedIn) return;
+    let current = true;
+    queueMicrotask(() => {
+      if (current) setSavedIds(readLocal());
+    });
+    return () => {
+      current = false;
+    };
   }, [signedIn]);
 
   const filtered = useMemo(

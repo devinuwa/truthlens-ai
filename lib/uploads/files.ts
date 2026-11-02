@@ -57,3 +57,35 @@ function label(name: string): string {
   const clean = name.replace(/[^\w .()-]/g, "").trim().slice(0, 80);
   return clean || "That file";
 }
+
+type ClientFile = { name: string; type: string; size: number };
+
+export function clientUploadIssue(files: ClientFile[]): string | null {
+  if (files.length === 0) return "Choose a PNG, JPG, WEBP, or PDF.";
+  const pdfs = files.filter(isPdfChoice);
+  const images = files.filter((file) => !isPdfChoice(file));
+  if (pdfs.length > 0 && images.length > 0) {
+    return "Check a PDF on its own, or check up to 3 images. Do not mix them in one check.";
+  }
+  if (pdfs.length > 1) return "Check one PDF at a time.";
+  if (images.length > MAX_IMAGES) return `Check up to ${MAX_IMAGES} images at a time.`;
+  for (const file of files) {
+    const pdf = isPdfChoice(file);
+    if (!pdf && !isImageChoice(file)) return `${label(file.name)} is not a PNG, JPG, WEBP, or PDF.`;
+    if (file.size <= 0) return `${label(file.name)} is empty.`;
+    const limit = pdf ? MAX_PDF_BYTES : MAX_IMAGE_BYTES;
+    if (file.size > limit) return `${label(file.name)} is too large. The limit is ${pdf ? 10 : 5} MB.`;
+  }
+  return null;
+}
+
+function isPdfChoice(file: ClientFile): boolean {
+  return file.type === PDF_TYPE || file.name.toLowerCase().endsWith(".pdf");
+}
+
+function isImageChoice(file: ClientFile): boolean {
+  const type = file.type.trim().toLowerCase();
+  if (type === "image/png" || type === "image/jpeg" || type === "image/webp") return true;
+  if (type && type !== "application/octet-stream") return false;
+  return /\.(png|jpe?g|webp)$/i.test(file.name);
+}

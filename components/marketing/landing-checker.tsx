@@ -1,11 +1,12 @@
 "use client";
 
 import { FileUp, Link2, MessageSquareText } from "lucide-react";
-import { useEffect, useState, type DragEvent, type FormEvent } from "react";
+import { useEffect, useState, type DragEvent, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ResultPanel } from "@/components/analysis/result-panel";
 import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { BANK_OTP_EXAMPLE } from "@/lib/content/demo-message";
+import { clientUploadIssue } from "@/lib/uploads/files";
 
 const SCHOLARSHIP_EXAMPLE =
   "Congratulations! You have been shortlisted for a Federal Government scholarship. Pay N5000 processing fee today to secure your slot. Send payment to this personal account.";
@@ -26,11 +27,22 @@ export function LoadExample({ label, text }: { label: string; text: string }) {
   );
 }
 
-export function LandingChecker({ signedIn }: { signedIn: boolean }) {
-  const [tab, setTab] = useState<Tab>("message");
+const TABS: Tab[] = ["message", "url", "file"];
+
+export function LandingChecker({
+  signedIn,
+  mode = "all",
+  framed = true,
+}: {
+  signedIn: boolean;
+  mode?: "all" | "file";
+  framed?: boolean;
+}) {
+  const [tab, setTab] = useState<Tab>(mode === "file" ? "file" : "message");
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [excerpt, setExcerpt] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,7 +84,7 @@ export function LandingChecker({ signedIn }: { signedIn: boolean }) {
     try {
       const response = tab === "file" ? await sendFile(files, controller.signal) : await sendJson(tab, text, url, controller.signal);
       const raw = await response.text();
-      let payload: (AnalysisResult & { error?: string }) | null = null;
+      let payload: (AnalysisResult & { error?: string; sourceExcerpt?: string }) | null = null;
       try {
         payload = JSON.parse(raw) as AnalysisResult & { error?: string };
       } catch {
@@ -83,6 +95,7 @@ export function LandingChecker({ signedIn }: { signedIn: boolean }) {
         setError(payload?.error || "The check could not be completed.");
         return;
       }
+      setExcerpt(typeof payload.sourceExcerpt === "string" ? payload.sourceExcerpt : "");
       setResult(payload);
     } catch (caught) {
       const aborted = caught instanceof DOMException && caught.name === "AbortError";
@@ -94,15 +107,23 @@ export function LandingChecker({ signedIn }: { signedIn: boolean }) {
   }
 
   function addFiles(list: FileList | File[]) {
-    const next = [...list].slice(0, 3);
-    const pdf = next.some((file) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-    if (pdf && next.length > 1) {
-      setError("Check one PDF at a time.");
-      setFiles(next.filter((file) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")).slice(0, 1));
+    const next = [...list].slice(0, 4);
+    const issue = clientUploadIssue(next.map((file) => ({ name: file.name, type: file.type, size: file.size })));
+    if (issue) {
+      setError(issue);
+      setFiles([]);
       return;
     }
     setError("");
     setFiles(next);
+  }
+
+  function onTabKey(event: ReactKeyboardEvent) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const index = TABS.indexOf(tab);
+    const step = event.key === "ArrowRight" ? 1 : TABS.length - 1;
+    chooseTab(TABS[(index + step) % TABS.length]);
   }
 
   function chooseTab(next: Tab) {
@@ -111,14 +132,22 @@ export function LandingChecker({ signedIn }: { signedIn: boolean }) {
     setResult(null);
   }
 
+  const sourceText = tab === "file" ? excerpt : tab === "url" ? url : text;
+  const fullCheckerHref = tab === "url" ? "/check-link" : tab === "file" ? "/check-file" : "/check-message";
+  const shell = framed
+    ? "scroll-mt-24 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/10 sm:p-6"
+    : "scroll-mt-24";
+
   return (
-    <div id="check" className="scroll-mt-6 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/10 sm:p-6">
-      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-canvas p-1" role="tablist" aria-label="What to check">
-        <TabButton current={tab} id="message" icon={MessageSquareText} label="Message" onClick={chooseTab} />
-        <TabButton current={tab} id="url" icon={Link2} label="Link" onClick={chooseTab} />
-        <TabButton current={tab} id="file" icon={FileUp} label="File" onClick={chooseTab} />
-      </div>
-      <form onSubmit={onSubmit} className="mt-4 space-y-4">
+    <div id="check" className={shell}>
+      {mode === "all" ? (
+        <div className="grid grid-cols-3 gap-2 rounded-2xl bg-canvas p-1" role="tablist" aria-label="What to check" onKeyDown={onTabKey}>
+          <TabButton current={tab} id="message" icon={MessageSquareText} label="Message" onClick={chooseTab} />
+          <TabButton current={tab} id="url" icon={Link2} label="Link" onClick={chooseTab} />
+          <TabButton current={tab} id="file" icon={FileUp} label="File" onClick={chooseTab} />
+        </div>
+      ) : null}
+      <form onSubmit={onSubmit} className={mode === "all" ? "mt-4 space-y-4" : "space-y-4"}>
         {tab === "message" ? (
           <div>
             <label htmlFor="landing-message" className="text-sm font-semibold">Paste a suspicious message</label>
@@ -168,9 +197,11 @@ export function LandingChecker({ signedIn }: { signedIn: boolean }) {
       {result ? (
         <ResultPanel
           result={result}
-          sourceText={tab === "url" ? url : text}
+          sourceText={sourceText}
+          sourceKind={tab === "file" ? "file" : tab === "url" ? "url" : "message"}
           signedIn={signedIn}
-          resetHref="/check-message"
+          resetHref={mode === "file" ? "/check-message" : fullCheckerHref}
+          fullCheckerLabel={mode === "file" ? "Check a pasted message" : "Open the full checker"}
           resetLabel="Clear this result"
           onReset={() => setResult(null)}
         />

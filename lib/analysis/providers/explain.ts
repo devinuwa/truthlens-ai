@@ -78,6 +78,7 @@ async function askGemini(text: string, evidence: string[]): Promise<ModelNote> {
   );
   if (!raw.ok) {
     const { responseMimeType: _mime, ...generationConfig } = payload.generationConfig;
+    void _mime;
     raw = await postJson(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`,
       { "content-type": "application/json", "x-goog-api-key": apiKey },

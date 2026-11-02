@@ -37,8 +37,8 @@ export async function POST(request: Request) {
       const bytes = new Uint8Array(await file.arrayBuffer());
       checked.push(checkUpload({ name: file.name, type: file.type, bytes }));
     }
-    const result = await assessUpload(checked);
-    return NextResponse.json(result);
+    const assessed = await assessUpload(checked);
+    return NextResponse.json({ ...assessed.result, sourceExcerpt: assessed.sourceExcerpt });
   } catch (error) {
     if (error instanceof UploadRejectedError || (error instanceof Error && /PDF|password|pages|readable/i.test(error.message))) {
       return NextResponse.json({ error: error.message }, { status: 400 });

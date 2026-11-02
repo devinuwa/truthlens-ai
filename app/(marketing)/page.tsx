@@ -57,24 +57,27 @@ export default async function HomePage() {
   await connection();
   const user = await getOptionalUser();
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:py-16">
-      <section className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="lg:pt-4">
-          <p className="text-sm font-semibold text-primary">TruthLens AI</p>
-          <h1 className="mt-3 max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
-            Think it might be a scam? Check before you act.
-          </h1>
-          <p className="mt-4 max-w-xl text-lg leading-8">
-            Analyse suspicious messages, links, job offers and scholarship opportunities. Understand the warning signs and know what to do next.
-          </p>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-muted">
-            A result is a risk reading of the wording you provide. It cannot guarantee that a message, person, website, or opportunity is legitimate.
-          </p>
+    <div>
+      <section className="border-b border-ink/5 bg-white">
+        <div className="mx-auto grid max-w-6xl items-start gap-8 px-4 py-8 sm:py-14 lg:grid-cols-[0.86fr_1.14fr] lg:gap-12">
+          <div className="lg:pt-6">
+            <p className="text-sm font-semibold text-primary">Scam-risk check for students</p>
+            <h1 className="mt-3 max-w-xl text-3xl font-bold tracking-tight text-balance sm:text-5xl sm:leading-tight">
+              Think it might be a scam? Check before you act.
+            </h1>
+            <p className="mt-4 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
+              Analyse suspicious messages, links, job offers and scholarship opportunities. Understand the warning signs and know what to do next.
+            </p>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-muted">
+              A result is a risk reading of the wording you provide. It cannot guarantee that a message, person, website, or opportunity is legitimate.
+            </p>
+          </div>
+          <LandingChecker signedIn={Boolean(user)} />
         </div>
-        <LandingChecker signedIn={Boolean(user)} />
       </section>
+      <div className="mx-auto max-w-6xl px-4 pb-16">
 
-      <section className="mt-20" aria-labelledby="how-heading">
+      <section className="mt-16" aria-labelledby="how-heading">
         <h2 id="how-heading" className="text-3xl font-bold">How TruthLens works</h2>
         <ol className="mt-6 grid gap-4 md:grid-cols-3">
           {[
@@ -157,7 +160,7 @@ export default async function HomePage() {
         <h2 id="care-heading" className="text-3xl font-bold">Privacy and careful use</h2>
         <div className="mt-5 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-3xl bg-sun/50 p-5 text-sm leading-6">
-            <p>Do not paste a password, a full card number, an OTP, or a BVN if you can avoid it. Guest checks are not saved. A signed-in report stores the result, and the message only if you tick that option.</p>
+            <p>Do not paste a password, a full card number, an OTP, or a BVN if you can avoid it. Guest checks are not saved. A signed-in report stores the result, and the message or the words read from a file only if you tick that option.</p>
             <p className="mt-3">When a Gemini key is set, the text you check is sent to Google for the reading. A screenshot, or a picture from a scanned PDF page, is sent so the words can be copied. The PDF file itself is not sent. Uploaded files are not given a public address and are not kept after the check.</p>
             <p className="mt-3">If you already sent money or a code, contact your bank through its own app or the number on your card. If someone is threatening you, keep the message and tell a trusted adult. You are not to blame for being pressured.</p>
             <Link href="/privacy" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">Read the privacy notice</Link>
@@ -185,6 +188,7 @@ export default async function HomePage() {
           <ButtonLink href="/signup" variant="secondary">Create an account</ButtonLink>
         </div>
       </section>
+      </div>
     </div>
   );
 }

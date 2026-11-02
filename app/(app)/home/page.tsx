@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { MessageChecker } from "@/components/analysis/message-checker";
 import { UrlChecker } from "@/components/analysis/url-checker";
+import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { tipForDate } from "@/lib/content/tips";
@@ -48,6 +49,13 @@ export default async function DashboardPage() {
         <div className="mt-4">
           <MessageChecker signedIn={Boolean(user)} compact />
         </div>
+      </Card>
+      <Card>
+        <h2 className="text-xl font-bold">Check a screenshot or PDF</h2>
+        <p className="mt-2 text-sm text-muted">
+          PNG, JPG, or WEBP up to 5 MB, or one PDF up to 10 MB and 5 pages. The file is read for words and then discarded.
+        </p>
+        <ButtonLink href="/check-file" className="mt-4">Check a file</ButtonLink>
       </Card>
       <Card>
         <h2 className="text-xl font-bold">Check a link</h2>

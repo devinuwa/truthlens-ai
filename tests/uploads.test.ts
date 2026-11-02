@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { analyzeMessage } from "@/lib/analysis/message";
-import { MAX_IMAGE_BYTES, checkUpload, signatureMime } from "@/lib/uploads/files";
+import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, clientUploadIssue, checkUpload, signatureMime } from "@/lib/uploads/files";
 import { pagesToMessage, readPdf } from "@/lib/uploads/pdf-text";
 
 function textPdf(message: string): Uint8Array {
@@ -39,6 +39,22 @@ describe("upload checks", () => {
   it("rejects a type that does not match the contents", () => {
     const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0x00]);
     expect(() => checkUpload({ name: "photo.png", type: "image/png", bytes: jpeg })).toThrow(/contents are image\/jpeg/);
+  });
+
+  it("rejects a client-side choice before the file is uploaded", () => {
+    expect(clientUploadIssue([])).toMatch(/Choose a PNG/);
+    expect(clientUploadIssue([{ name: "notes.txt", type: "text/plain", size: 20 }])).toMatch(/not a PNG/);
+    expect(clientUploadIssue([{ name: "scan.pdf", type: "application/pdf", size: MAX_PDF_BYTES + 1 }])).toMatch(/too large/);
+    expect(clientUploadIssue([
+      { name: "one.png", type: "image/png", size: 100 },
+      { name: "letter.pdf", type: "application/pdf", size: 100 },
+    ])).toMatch(/on its own/);
+    expect(clientUploadIssue([
+      { name: "a.png", type: "image/png", size: 10 },
+      { name: "b.jpg", type: "image/jpeg", size: 10 },
+      { name: "c.webp", type: "image/webp", size: 10 },
+      { name: "d.png", type: "image/png", size: 10 },
+    ])).toMatch(/up to 3/);
   });
 
   it("rejects an empty file and a file over the image limit", () => {

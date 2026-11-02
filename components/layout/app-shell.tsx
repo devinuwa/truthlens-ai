@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   FileText,
+  FileUp,
   GraduationCap,
   House,
   Link2,
@@ -24,6 +25,7 @@ const items = [
   { href: "/home", label: "Home", icon: House },
   { href: "/check-message", label: "Check a Message", icon: Search },
   { href: "/check-link", label: "Check a Link", icon: Link2 },
+  { href: "/check-file", label: "Check a File", icon: FileUp },
   { href: "/opportunities", label: "Scholarships & Opportunities", icon: GraduationCap },
   { href: "/reports", label: "My Reports", icon: FileText },
   { href: "/academy", label: "Digital Safety Academy", icon: BookOpen },

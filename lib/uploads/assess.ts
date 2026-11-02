@@ -5,7 +5,12 @@ import { MAX_IMAGES, UploadRejectedError, type CheckedFile } from "@/lib/uploads
 import { pagesToMessage, readPdf, type PdfPage } from "@/lib/uploads/pdf-text";
 import { transcribeImage } from "@/lib/uploads/transcribe";
 
-export async function assessUpload(files: CheckedFile[]): Promise<AnalysisResult> {
+export type UploadAssessment = {
+  result: AnalysisResult;
+  sourceExcerpt: string;
+};
+
+export async function assessUpload(files: CheckedFile[]): Promise<UploadAssessment> {
   if (files.length === 0) throw new UploadRejectedError("Choose a PNG, JPG, WEBP, or PDF.");
   const pdfs = files.filter((file) => file.mime === "application/pdf");
   const images = files.filter((file) => file.mime !== "application/pdf");
@@ -19,7 +24,7 @@ export async function assessUpload(files: CheckedFile[]): Promise<AnalysisResult
   return assessImages(images);
 }
 
-async function assessPdf(file: CheckedFile): Promise<AnalysisResult> {
+async function assessPdf(file: CheckedFile): Promise<UploadAssessment> {
   const pages = await readPdf(file.bytes, async (_page, images) => {
     if (images.length === 0) return "";
     const parts: string[] = [];
@@ -42,10 +47,10 @@ async function assessPdf(file: CheckedFile): Promise<AnalysisResult> {
     throw new UploadRejectedError("No readable words were found in this PDF. A scanned page may be blank, blurry, or protected.");
   }
   const result = await explainAnalysis(text, analyzeMessage(text));
-  return annotate(result, pdfNote(pages));
+  return { result: annotate(result, pdfNote(pages)), sourceExcerpt: text };
 }
 
-async function assessImages(files: CheckedFile[]): Promise<AnalysisResult> {
+async function assessImages(files: CheckedFile[]): Promise<UploadAssessment> {
   const parts: string[] = [];
   const missed: number[] = [];
   let providerFailures = 0;
@@ -68,7 +73,10 @@ async function assessImages(files: CheckedFile[]): Promise<AnalysisResult> {
   }
   const result = await explainAnalysis(text, analyzeMessage(text));
   const miss = missed.length > 0 ? ` Image ${missed.join(", ")} could not be read.` : "";
-  return annotate(result, `Words were read from the image. A logo or layout was not treated as proof of who sent it.${miss}`);
+  return {
+    result: annotate(result, `Words were read from the image. A logo or layout was not treated as proof of who sent it.${miss}`),
+    sourceExcerpt: text,
+  };
 }
 
 function pdfNote(pages: PdfPage[]): string {
