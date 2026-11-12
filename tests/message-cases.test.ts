@@ -21,6 +21,8 @@ const cases: Array<{ name: string; text: string; risk: RiskLevel; classification
   { name: "shortlist only", text: "You have been shortlisted for a scholarship. Reply with your full name and school.", risk: "medium", classification: "social_engineering" },
   { name: "bank call", text: "Hi, this is your bank. Call me when you can.", risk: "medium", classification: "impersonation" },
   { name: "short link", text: "The form is here: https://bit.ly/sch-form", risk: "medium", classification: "malicious_link" },
+  { name: "cashback link", text: "Dear VIP User, your Weekly cash back of 39,370 NGN has added to your account. Check now: https://bit.ly/example", risk: "high", classification: "malicious_link" },
+  { name: "cashback amount", text: "Your weekly cashback of 5000 naira is waiting. Ask the office if you expected it.", risk: "medium", classification: "suspicious_payment" },
   { name: "insult", text: "You are stupid and nobody likes you.", risk: "medium", classification: "cyberbullying" },
   { name: "grant later", text: "Congratulations, you have been selected for a grant. We will email the details later.", risk: "medium", classification: "social_engineering" },
   { name: "class dues", text: "Please pay the class dues of 2000 naira to the class captain today.", risk: "uncertain", classification: "suspicious_payment" },

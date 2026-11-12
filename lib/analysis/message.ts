@@ -26,6 +26,7 @@ const INDICATOR_CATEGORY: Record<string, Indicator["category"]> = {
   "account-threat": "phishing",
   "payment-request": "payment_or_personal_information",
   "unspecified-payment": "payment_or_personal_information",
+  "credited-lure": "payment_or_personal_information",
   "unexpected-selection": "fake_opportunity",
   "impersonation-claim": "scam",
   secrecy: "manipulation",

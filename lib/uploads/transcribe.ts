@@ -29,42 +29,52 @@ async function gemini(parts: unknown[]): Promise<string> {
   const apiKey = getGeminiApiKey();
   if (!apiKey) throw new Error("No Gemini API key is set, so this file cannot be read.");
   const modelId = gemmaModelId(getGemmaModelOverride());
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 25_000);
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM }] },
-          contents: [{ role: "user", parts }],
-          generationConfig: {
-            temperature: 0,
-            maxOutputTokens: 1200,
-            responseMimeType: "application/json",
-            thinkingConfig: { thinkingLevel: "minimal" },
-          },
-        }),
-        signal: controller.signal,
-        cache: "no-store",
-      },
-    );
-    if (!response.ok) throw new Error("The file reading did not come back.");
-    const payload = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string; thought?: boolean }> } }>;
-    };
-    const text = (payload.candidates?.[0]?.content?.parts ?? [])
-      .filter((part) => part.thought !== true && typeof part.text === "string")
-      .map((part) => part.text)
-      .join("\n")
-      .trim();
-    if (!text) throw new Error("The file reading came back empty.");
-    return text;
-  } finally {
-    clearTimeout(timer);
+  let lastFailure = "The file reading did not come back.";
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20_000);
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM }] },
+            contents: [{ role: "user", parts }],
+            generationConfig: {
+              temperature: 0,
+              maxOutputTokens: 1200,
+              responseMimeType: "application/json",
+              thinkingConfig: { thinkingLevel: "minimal" },
+            },
+          }),
+          signal: controller.signal,
+          cache: "no-store",
+        },
+      );
+      if (!response.ok) {
+        lastFailure = "The file reading did not come back.";
+        if (response.status !== 429 && response.status < 500) break;
+        continue;
+      }
+      const payload = (await response.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string; thought?: boolean }> } }>;
+      };
+      const text = (payload.candidates?.[0]?.content?.parts ?? [])
+        .filter((part) => part.thought !== true && typeof part.text === "string")
+        .map((part) => part.text)
+        .join("\n")
+        .trim();
+      if (text) return text;
+      lastFailure = "The file reading came back empty.";
+    } catch {
+      lastFailure = "The file reading did not come back.";
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  throw new Error(lastFailure);
 }
 
 function readJson(raw: string): Record<string, unknown> | null {

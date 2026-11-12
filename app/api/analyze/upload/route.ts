@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     if (error instanceof UploadRejectedError || (error instanceof Error && /PDF|password|pages|readable/i.test(error.message))) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    if (error instanceof Error && /reading did not come back|API key/i.test(error.message)) {
+    if (error instanceof Error && /reading did not come back|came back empty|API key/i.test(error.message)) {
       return NextResponse.json(
         { error: "The file could not be read just now. Try again, or paste the words as text. The file was not stored." },
         { status: 502 },

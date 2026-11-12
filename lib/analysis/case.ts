@@ -239,8 +239,23 @@ function collectHits(text: string): Hit[] {
     });
   }
 
+  const credited = text.match(
+    /\bcash\s*back\b[\s\S]{0,40}\b(?:naira|ngn|₦|\d[\d,]{2,})|\b(?:has|have) added to your account\b/i,
+  );
+  if (credited) {
+    const linked = /https?:\/\//i.test(text);
+    hits.push({
+      id: "credited-lure",
+      severity: linked ? "harmful" : "caution",
+      title: linked ? "It says money was added and sends you to a link" : "It says money was added to your account",
+      detail: "A bank or a phone network shows a credit inside the app you already use. A text that announces cash and asks you to tap a link is a common lure. The name on the message is not proof of who sent it.",
+      quote: clip(text, credited[0]),
+      hint: "suspicious_payment",
+    });
+  }
+
   const urgency = text.match(
-    /\b(urgent|immediately|right now|do not delay|last chance|final warning|within \d+ (?:minutes|hours)|expires? today|\btoday\b)\b/i,
+    /\b(urgent|immediately|right now|check now|do not delay|last chance|final warning|within \d+ (?:minutes|hours)|expires? today|\btoday\b)\b/i,
   );
   if (urgency && hits.some((hit) => hit.severity === "harmful" || hit.severity === "caution")) {
     hits.push({
@@ -350,6 +365,7 @@ function classificationFrom(hits: Hit[], topics: ReturnType<typeof topicFlags>, 
   if (hits.some((hit) => hit.id === "impersonation-claim")) return "impersonation";
   if (hits.some((hit) => hit.id === "unexpected-selection")) return "social_engineering";
   if (hits.some((hit) => hit.id === "account-threat")) return "phishing";
+  if (hits.some((hit) => hit.id === "credited-lure")) return "suspicious_payment";
   return risk === "uncertain" ? "insufficient_evidence" : "apparently_low_risk";
 }
 
@@ -438,6 +454,9 @@ function actionsFor(hits: Hit[], topics: ReturnType<typeof topicFlags>, risk: Ri
   }
   if (topics.opportunity) {
     actions.push("Look up the scholarship or employer yourself. A real offer can be confirmed on an official page without paying a stranger.");
+  }
+  if (hits.some((hit) => hit.id === "credited-lure")) {
+    actions.push("Do not tap a link to check the money. Open the bank or network app you already use and look there.");
   }
   if (hits.some((hit) => hit.hint === "malicious_link")) {
     actions.push("Do not open the link. If you need the organisation, type its address from a place you already trust.");
