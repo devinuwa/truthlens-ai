@@ -1,12 +1,13 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { SettingsForm } from "@/components/settings/settings-form";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { getPublicSupabaseConfig } from "@/lib/env";
 
-export const instant = false;
 export const metadata = { title: "Settings" };
 
-export default async function SettingsPage() {
+export default function SettingsPage() {
   if (!getPublicSupabaseConfig()) {
     return (
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
@@ -17,6 +18,14 @@ export default async function SettingsPage() {
       </section>
     );
   }
+  return (
+    <Suspense fallback={<ContentFallback label="Settings" />}>
+      <SettingsContent />
+    </Suspense>
+  );
+}
+
+async function SettingsContent() {
   const user = await getOptionalUser();
   if (!user) redirect("/login?next=/settings");
 

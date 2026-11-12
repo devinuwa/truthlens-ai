@@ -1,10 +1,9 @@
-import { connection } from "next/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import { LandingChecker, LoadExample } from "@/components/marketing/landing-checker";
 import { ButtonLink } from "@/components/ui/button";
 import { getOptionalUser } from "@/lib/auth/current-user";
 
-export const instant = false;
 export const metadata = {
   title: "TruthLens AI",
   description: "Check a suspicious message, link, screenshot, or PDF before you act. TruthLens explains warning signs and what is still uncertain.",
@@ -53,41 +52,63 @@ const sources = [
   },
 ];
 
-export default async function HomePage() {
-  await connection();
-  const user = await getOptionalUser();
+export default function HomePage() {
   return (
     <div>
-      <section className="border-b border-ink/5 bg-white">
-        <div className="mx-auto grid max-w-6xl items-start gap-8 px-4 py-8 sm:py-14 lg:grid-cols-[0.86fr_1.14fr] lg:gap-12">
-          <div className="lg:pt-6">
-            <p className="text-sm font-semibold text-primary">Scam-risk check for students</p>
-            <h1 className="mt-3 max-w-xl text-3xl font-bold tracking-tight text-balance sm:text-5xl sm:leading-tight">
-              Think it might be a scam? Check before you act.
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
-              Analyse suspicious messages, links, job offers and scholarship opportunities. Understand the warning signs and know what to do next.
-            </p>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-muted">
-              A result is a risk reading of the wording you provide. It cannot guarantee that a message, person, website, or opportunity is legitimate.
-            </p>
+      <section className="px-4 pb-6 pt-8 text-center sm:pt-14">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-sm font-bold text-primary">Scam-risk check for students</p>
+          <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-balance sm:text-6xl sm:leading-[0.98]">
+            Think it might be a{" "}
+            <span className="relative mx-1 inline-block px-2 text-primary">
+              scam
+              <span aria-hidden="true" className="pointer-events-none absolute -inset-y-1 -left-1 -right-1 rounded-[50%] border-[3px] border-primary/50" />
+            </span>
+            ? Check before you act.
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8">
+            Analyse suspicious messages, links, job offers and scholarship opportunities. Understand the warning signs and know what to do next.
+          </p>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">
+            A result is a risk reading of the wording you provide. It cannot guarantee that a message, person, website, or opportunity is legitimate.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <ButtonLink href="#check">Check a message</ButtonLink>
+            <ButtonLink href="/academy" variant="secondary">Open the Academy</ButtonLink>
           </div>
-          <LandingChecker signedIn={Boolean(user)} />
+        </div>
+        <div className="mx-auto mt-10 max-w-3xl text-left">
+          <Suspense fallback={<div className="h-80 animate-pulse rounded-[28px] bg-white" aria-busy="true" />}>
+            <LandingCheckerSlot />
+          </Suspense>
         </div>
       </section>
       <div className="mx-auto max-w-6xl px-4 pb-16">
 
-      <section className="mt-16" aria-labelledby="how-heading">
-        <h2 id="how-heading" className="text-3xl font-bold">How TruthLens works</h2>
-        <ol className="mt-6 grid gap-4 md:grid-cols-3">
+      <section className="mt-16 grid items-center gap-8 lg:grid-cols-2" aria-labelledby="how-heading">
+        <div>
+          <h2 id="how-heading" className="text-4xl font-extrabold tracking-tight">How TruthLens works</h2>
+          <p className="mt-4 max-w-xl text-lg leading-8">
+            Paste what you were sent, see the warning signs in the wording, and get a next step you can actually use.
+          </p>
+          <ul className="mt-6 space-y-3 text-sm font-semibold">
+            {["The wording is checked for pressure, money, and secrecy.", "Quotes come from the text you provided.", "A quiet result still does not prove who sent it."].map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <span aria-hidden="true" className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-lilac text-sm text-primary">✓</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <ol className="grid gap-3 rounded-[32px] bg-lilac p-4 sm:p-6">
           {[
             ["Submit", "Paste a message, enter an address, or add a screenshot or PDF. Leave out passwords and identity numbers."],
             ["Analyse", "The same checks look for a harmful request, pressure, a hidden link, or a threat. An optional reading explains that evidence."],
             ["Understand", "You see the risk, the quotes, what is still unknown, and a practical next step. No match is not a guarantee."],
           ].map(([title, text], index) => (
-            <li key={title} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
-              <p className="text-sm font-semibold text-primary">{index + 1}</p>
-              <h3 className="mt-2 text-xl font-bold">{title}</h3>
+            <li key={title} className="rounded-[24px] bg-white p-5">
+              <p className="text-sm font-bold text-primary">{index + 1}</p>
+              <h3 className="mt-1 text-xl font-extrabold">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
             </li>
           ))}
@@ -95,11 +116,11 @@ export default async function HomePage() {
       </section>
 
       <section className="mt-20" aria-labelledby="identify-heading">
-        <h2 id="identify-heading" className="text-3xl font-bold">What TruthLens can help you notice</h2>
+        <h2 id="identify-heading" className="text-4xl font-extrabold tracking-tight">What TruthLens can help you notice</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">These are patterns in the wording. They are not a finding that a crime has been confirmed.</p>
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {threats.map(([title, text]) => (
-            <li key={title} className="rounded-3xl bg-white p-5 ring-1 ring-ink/5">
+            <li key={title} className="rounded-3xl bg-white p-5 shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)]">
               <h3 className="font-bold">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
             </li>
@@ -109,9 +130,9 @@ export default async function HomePage() {
 
       <section className="mt-20 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]" aria-labelledby="preview-heading">
         <div>
-          <h2 id="preview-heading" className="text-3xl font-bold">What a report looks like</h2>
+          <h2 id="preview-heading" className="text-4xl font-extrabold tracking-tight">What a report looks like</h2>
           <p className="mt-2 text-sm leading-6 text-muted">This card is a fictional illustration of the report shape. It is not a live score. Run the example in the checker if you want the real reading.</p>
-          <article className="mt-5 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
+          <article className="mt-5 rounded-3xl bg-white p-5 shadow-sm shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)]">
             <p className="text-sm font-semibold text-danger">High risk · Scholarship scam</p>
             <p className="mt-3 text-sm leading-6">A scholarship message that asks for a fee today, paid to a personal account.</p>
             <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6">
@@ -124,10 +145,10 @@ export default async function HomePage() {
           </article>
         </div>
         <div>
-          <h2 className="text-3xl font-bold">Why use it</h2>
+          <h2 className="text-4xl font-extrabold tracking-tight">Why use it</h2>
           <ul className="mt-5 space-y-3">
             {reasons.map(([title, text]) => (
-              <li key={title} className="rounded-3xl bg-white p-5 ring-1 ring-ink/5">
+              <li key={title} className="rounded-3xl bg-white p-5 shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)]">
                 <h3 className="font-bold">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
               </li>
@@ -136,8 +157,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mt-20 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8" aria-labelledby="academy-heading">
-        <h2 id="academy-heading" className="text-3xl font-bold">Digital Safety Academy</h2>
+      <section className="mt-20 rounded-3xl bg-white p-6 shadow-sm shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)] sm:p-8" aria-labelledby="academy-heading">
+        <h2 id="academy-heading" className="text-4xl font-extrabold tracking-tight">Digital Safety Academy</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6">
           Short lessons on pressure, phishing, passwords, scholarship and job scams, social media, and what to keep private. The first lesson is open. The next one opens after a signed-in quiz is passed.
         </p>
@@ -145,10 +166,10 @@ export default async function HomePage() {
       </section>
 
       <section className="mt-20" aria-labelledby="faq-heading">
-        <h2 id="faq-heading" className="text-3xl font-bold">Questions</h2>
+        <h2 id="faq-heading" className="text-4xl font-extrabold tracking-tight">Questions</h2>
         <div className="mt-5 space-y-3">
           {faqs.map(([question, answer]) => (
-            <details key={question} className="rounded-3xl bg-white p-5 ring-1 ring-ink/5">
+            <details key={question} className="rounded-3xl bg-white p-5 shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)]">
               <summary className="cursor-pointer font-semibold">{question}</summary>
               <p className="mt-2 text-sm leading-6 text-muted">{answer}</p>
             </details>
@@ -157,7 +178,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mt-20" aria-labelledby="care-heading">
-        <h2 id="care-heading" className="text-3xl font-bold">Privacy and careful use</h2>
+        <h2 id="care-heading" className="text-4xl font-extrabold tracking-tight">Privacy and careful use</h2>
         <div className="mt-5 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-3xl bg-sun/50 p-5 text-sm leading-6">
             <p>Do not paste a password, a full card number, an OTP, or a BVN if you can avoid it. Guest checks are not saved. A signed-in report stores the result, and the message or the words read from a file only if you tick that option.</p>
@@ -167,7 +188,7 @@ export default async function HomePage() {
           </div>
           <ul className="space-y-3">
             {sources.map((source) => (
-              <li key={source.href} className="rounded-3xl bg-white p-4 ring-1 ring-ink/5">
+              <li key={source.href} className="rounded-3xl bg-white p-4 shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)]">
                 <a href={source.href} className="font-semibold text-primary" target="_blank" rel="noopener noreferrer">
                   {source.title}
                   <span className="sr-only"> (opens in a new tab)</span>
@@ -180,15 +201,20 @@ export default async function HomePage() {
         <p className="mt-4 text-sm text-muted">TruthLens is not endorsed by Access Bank, the Bank of Industry, or the Central Bank of Nigeria.</p>
       </section>
 
-      <section className="mt-20 rounded-3xl bg-primary px-6 py-8 text-white">
-        <h2 className="text-3xl font-bold">Check before you reply.</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90">A guest check is enough to start. An account is only for a private report you can delete.</p>
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-          <ButtonLink href="#check" variant="sun">Check something now</ButtonLink>
+      <section className="mt-20 rounded-[32px] bg-lilac px-6 py-10">
+        <h2 className="text-4xl font-extrabold tracking-tight">Check before you reply.</h2>
+        <p className="mt-3 max-w-2xl text-base leading-7">A guest check is enough to start. An account is only for a private report you can delete.</p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <ButtonLink href="#check">Check something now</ButtonLink>
           <ButtonLink href="/signup" variant="secondary">Create an account</ButtonLink>
         </div>
       </section>
       </div>
     </div>
   );
+}
+
+async function LandingCheckerSlot() {
+  const user = await getOptionalUser();
+  return <LandingChecker signedIn={Boolean(user)} />;
 }

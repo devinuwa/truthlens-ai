@@ -17,7 +17,7 @@ export function LoadExample({ label, text }: { label: string; text: string }) {
   return (
     <button
       type="button"
-      className="mt-4 inline-flex min-h-11 items-center rounded-2xl bg-primary px-4 text-sm font-semibold text-white"
+      className="mt-4 inline-flex min-h-12 items-center rounded-full bg-ink px-5 text-sm font-bold text-white"
       onClick={() => {
         window.dispatchEvent(new CustomEvent("truthlens-example", { detail: { tab: "message", text } }));
       }}
@@ -135,7 +135,7 @@ export function LandingChecker({
   const sourceText = tab === "file" ? excerpt : tab === "url" ? url : text;
   const fullCheckerHref = tab === "url" ? "/check-link" : tab === "file" ? "/check-file" : "/check-message";
   const shell = framed
-    ? "scroll-mt-24 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/10 sm:p-6"
+    ? "scroll-mt-24 rounded-[28px] bg-white p-4 shadow-[0_24px_60px_-36px_rgba(80,40,120,0.7)] sm:p-6"
     : "scroll-mt-24";
 
   return (
@@ -234,7 +234,7 @@ function TabButton({ current, id, label, icon: Icon, onClick }: {
 
 function ExampleButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="min-h-11 rounded-full bg-canvas px-3 text-sm font-semibold text-primary">
+    <button type="button" onClick={onClick} className="min-h-11 rounded-full bg-lilac px-4 text-sm font-bold text-primary">
       {label}
     </button>
   );

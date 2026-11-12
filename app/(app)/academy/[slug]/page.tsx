@@ -1,14 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { LessonPlayer } from "@/components/academy/lesson-player";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { loadQuizAttempts } from "@/lib/academy/attempts";
 import { neighbourSlugs, orderedSlugs, toPublicLesson } from "@/lib/academy/curriculum";
 import { getLesson } from "@/lib/academy/lessons";
 import { canAccessLesson, passRatio } from "@/lib/academy/progress";
 import { getOptionalUser } from "@/lib/auth/current-user";
-
-export const instant = false;
 
 export function generateStaticParams() {
   return orderedSlugs().map((slug) => ({ slug }));
@@ -19,8 +18,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: getLesson(slug)?.title ?? "Lesson" };
 }
 
-export default async function LessonPage({ params }: { params: Promise<{ slug: string }> }) {
-  await connection();
+export default function LessonPage({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <Suspense fallback={<ContentFallback label="Lesson" />}>
+      <LessonContent params={params} />
+    </Suspense>
+  );
+}
+
+async function LessonContent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const lesson = getLesson(slug);
   if (!lesson) notFound();

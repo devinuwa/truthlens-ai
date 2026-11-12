@@ -45,6 +45,7 @@ export function OpportunityBrowser({
   const [verification, setVerification] = useState<"all" | Opportunity["verificationStatus"]>("all");
   const [savedIds, setSavedIds] = useState<string[]>(saved);
   const [notice, setNotice] = useState("");
+  const [busySlug, setBusySlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (signedIn) return;
@@ -63,26 +64,37 @@ export function OpportunityBrowser({
   );
 
   async function toggleSave(slug: string) {
+    if (busySlug === slug) return;
     const already = savedIds.includes(slug);
+    const next = already ? savedIds.filter((item) => item !== slug) : [...savedIds, slug];
+    setSavedIds(next);
+    setBusySlug(slug);
     if (!signedIn) {
-      const next = already ? savedIds.filter((item) => item !== slug) : [...savedIds, slug];
-      setSavedIds(next);
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       setNotice(already ? "Removed on this device." : "Saved on this device. Sign in to keep it on your account.");
+      setBusySlug(null);
       return;
     }
-    const response = await fetch(already ? `/api/bookmarks?slug=${encodeURIComponent(slug)}` : "/api/bookmarks", {
-      method: already ? "DELETE" : "POST",
-      headers: { "content-type": "application/json" },
-      body: already ? undefined : JSON.stringify({ slug }),
-    });
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      setNotice(payload?.error || "The save could not be changed.");
-      return;
+    setNotice(already ? "Removing…" : "Saving…");
+    try {
+      const response = await fetch(already ? `/api/bookmarks?slug=${encodeURIComponent(slug)}` : "/api/bookmarks", {
+        method: already ? "DELETE" : "POST",
+        headers: { "content-type": "application/json" },
+        body: already ? undefined : JSON.stringify({ slug }),
+      });
+      if (!response.ok) {
+        setSavedIds(savedIds);
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        setNotice(payload?.error || "The save could not be changed.");
+        return;
+      }
+      setNotice(already ? "Removed from your account." : "Saved to your account.");
+    } catch {
+      setSavedIds(savedIds);
+      setNotice("The save could not be changed.");
+    } finally {
+      setBusySlug(null);
     }
-    setSavedIds(already ? savedIds.filter((item) => item !== slug) : [...savedIds, slug]);
-    setNotice(already ? "Removed from your account." : "Saved to your account.");
   }
 
   return (
@@ -135,7 +147,13 @@ export function OpportunityBrowser({
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="sky">{item.opportunityType}</Badge>
                 <Badge tone={item.isSample ? "sun" : "teal"}>{verificationLabel(item)}</Badge>
-                {isExpired(item.deadline) ? <Badge tone="coral">Expired</Badge> : <Badge tone="teal">Deadline open or unlisted</Badge>}
+                {isExpired(item.deadline) ? (
+                  <Badge tone="coral">Expired</Badge>
+                ) : item.deadline ? (
+                  <Badge tone="teal">Still open</Badge>
+                ) : (
+                  <Badge tone="teal">No deadline listed</Badge>
+                )}
               </div>
               <h2 className="mt-3 text-xl font-bold">
                 <Link href={`/opportunities/${item.slug}`} className="hover:text-primary">
@@ -157,10 +175,11 @@ export function OpportunityBrowser({
                 <button
                   type="button"
                   onClick={() => void toggleSave(item.slug)}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-ink/10 px-4 text-sm font-semibold"
+                  disabled={busySlug === item.slug}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-ink/10 px-4 text-sm font-semibold disabled:opacity-60"
                 >
                   <Bookmark aria-hidden="true" size={16} />
-                  {savedIds.includes(item.slug) ? "Saved" : "Save"}
+                  {busySlug === item.slug ? (savedIds.includes(item.slug) ? "Saving…" : "Removing…") : savedIds.includes(item.slug) ? "Saved" : "Save"}
                 </button>
               </div>
             </li>

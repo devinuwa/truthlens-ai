@@ -1,7 +1,9 @@
 import "server-only";
+import { createClient } from "@supabase/supabase-js";
+import { cacheLife, cacheTag } from "next/cache";
+import { getPublicSupabaseConfig } from "@/lib/env";
 import { SAMPLE_OPPORTUNITIES } from "@/lib/opportunities/sample-data";
 import type { Opportunity } from "@/lib/opportunities/types";
-import { createUserClient } from "@/lib/supabase/server";
 
 export type OpportunityLoad = {
   opportunities: Opportunity[];
@@ -46,8 +48,11 @@ function fromRow(row: OpportunityRow): Opportunity {
 }
 
 export async function loadOpportunities(): Promise<OpportunityLoad> {
-  const supabase = await createUserClient();
-  if (!supabase) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("opportunities");
+  const config = getPublicSupabaseConfig();
+  if (!config) {
     return {
       opportunities: SAMPLE_OPPORTUNITIES,
       source: "demonstration",
@@ -56,6 +61,9 @@ export async function loadOpportunities(): Promise<OpportunityLoad> {
     };
   }
 
+  const supabase = createClient(config.url, config.anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
   const { data, error } = await supabase
     .from("opportunities")
     .select(

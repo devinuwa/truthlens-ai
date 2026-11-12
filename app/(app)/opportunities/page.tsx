@@ -1,13 +1,22 @@
+import { Suspense } from "react";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { OpportunityBrowser } from "@/components/opportunities/browser";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { SAMPLE_OPPORTUNITIES } from "@/lib/opportunities/sample-data";
 import { loadOpportunities } from "@/lib/opportunities/repository";
 import { createUserClient } from "@/lib/supabase/server";
 
-export const instant = false;
 export const metadata = { title: "Scholarships and opportunities" };
 
-export default async function OpportunitiesPage() {
+export default function OpportunitiesPage() {
+  return (
+    <Suspense fallback={<ContentFallback label="Scholarships and opportunities" />}>
+      <OpportunitiesContent />
+    </Suspense>
+  );
+}
+
+async function OpportunitiesContent() {
   const user = await getOptionalUser();
   const loaded = await loadOpportunities();
   let saved: string[] = [];

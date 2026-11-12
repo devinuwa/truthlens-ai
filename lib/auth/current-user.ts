@@ -1,4 +1,5 @@
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 import { createUserClient } from "@/lib/supabase/server";
 
 export type SessionUser = {
@@ -8,6 +9,9 @@ export type SessionUser = {
 };
 
 export async function getOptionalUser(): Promise<SessionUser | null> {
+  "use cache: private";
+  cacheLife("seconds");
+  cacheTag("current-user");
   const supabase = await createUserClient();
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getUser();

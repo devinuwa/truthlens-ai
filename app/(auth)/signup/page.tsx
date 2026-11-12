@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { AuthForm } from "@/components/auth/auth-form";
 
-export const instant = false;
 export const metadata = { title: "Sign up" };
 
 export default function SignUpPage() {

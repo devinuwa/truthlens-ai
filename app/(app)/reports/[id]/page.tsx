@@ -1,14 +1,22 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { DeleteReportButton } from "@/components/reports/delete-report-button";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { Badge } from "@/components/ui/badge";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { getOwnedReport, type StoredReport } from "@/lib/reports/repository";
 import { createUserClient } from "@/lib/supabase/server";
 
-export const instant = false;
+export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<ContentFallback label="Report" />}>
+      <ReportArticle params={params} />
+    </Suspense>
+  );
+}
 
-export default async function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
+async function ReportArticle({ params }: { params: Promise<{ id: string }> }) {
   const user = await getOptionalUser();
   if (!user) redirect("/login?next=/reports");
   const supabase = await createUserClient();

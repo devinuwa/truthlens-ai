@@ -3,7 +3,7 @@ export const metadata = { title: "About" };
 export default function AboutPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-bold">About TruthLens AI</h1>
+      <h1 className="text-4xl font-extrabold tracking-tight">About TruthLens AI</h1>
       <div className="mt-4 space-y-4 text-sm leading-6 text-muted">
         <p>
           TruthLens AI is an original student project for HIASFEST 2027, Category K: ICT and Technology. It is a digital-safety companion for secondary-school students, teenagers, and young people looking at scholarships.

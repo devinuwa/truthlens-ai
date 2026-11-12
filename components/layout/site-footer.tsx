@@ -14,10 +14,13 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-ink/5 bg-card">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-        <p>© 2026 devinuwa. TruthLens AI is open source under the MIT licence.</p>
-        <nav aria-label="Footer" className="flex flex-wrap gap-x-4 gap-y-2">
+    <footer className="mt-auto bg-white">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 text-sm text-muted sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="font-extrabold text-primary">TruthLens</p>
+          <p className="mt-2 max-w-sm">© 2026 devinuwa. TruthLens AI is open source under the MIT licence.</p>
+        </div>
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-4 gap-y-2 font-semibold">
           {links.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-ink">
               {link.label}

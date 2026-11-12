@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, refresh, updateTag } from "next/cache";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { createUserClient } from "@/lib/supabase/server";
 import { displayNameSchema, issueMessages } from "@/lib/validation/schemas";
@@ -16,7 +16,9 @@ export async function updateDisplayName(_previous: NameState, formData: FormData
   if (!supabase) return { error: "Accounts are not configured yet." };
   const { error } = await supabase.from("profiles").update({ display_name: parsed.data }).eq("id", user.id);
   if (error) return { error: "The name could not be saved." };
+  updateTag("current-user");
   revalidatePath("/settings");
   revalidatePath("/home");
+  refresh();
   return { ok: true };
 }

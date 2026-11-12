@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/env";
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       is_sample: parsed.data.isSample,
     });
     if (error) return NextResponse.json({ error: "The opportunity could not be saved." }, { status: 500 });
+    revalidateTag("opportunities", { expire: 0 });
     return NextResponse.json({ ok: true, slug }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "The admin database key is not configured." }, { status: 503 });

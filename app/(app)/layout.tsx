@@ -1,17 +1,25 @@
-import type { ReactNode } from "react";
-import { Suspense } from "react";
-import { connection } from "next/server";
+import { Suspense, type ReactNode } from "react";
+import { AccountFooter, AccountPending } from "@/components/layout/account-footer";
 import { AppShell } from "@/components/layout/app-shell";
 import { getOptionalUser } from "@/lib/auth/current-user";
 
-export const instant = false;
-
-export default async function AppLayout({ children }: { children: ReactNode }) {
-  await connection();
-  const user = await getOptionalUser();
+export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <AppShell user={user}>
-      <Suspense fallback={<p className="text-sm text-muted">Loading…</p>}>{children}</Suspense>
+    <AppShell account={<AccountArea />} mobileAccount={<AccountArea />}>
+      {children}
     </AppShell>
   );
+}
+
+function AccountArea() {
+  return (
+    <Suspense fallback={<AccountPending />}>
+      <AccountSlot />
+    </Suspense>
+  );
+}
+
+async function AccountSlot() {
+  const user = await getOptionalUser();
+  return <AccountFooter user={user} />;
 }

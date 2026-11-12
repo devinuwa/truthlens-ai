@@ -1,11 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { Badge } from "@/components/ui/badge";
 import { loadOpportunity } from "@/lib/opportunities/repository";
 import { isExpired, verificationLabel } from "@/lib/opportunities/types";
-
-export const instant = false;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -13,9 +13,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: item?.title ?? "Opportunity" };
 }
 
-export default async function OpportunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default function OpportunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <Suspense fallback={<ContentFallback label="Opportunity" />}>
+      <OpportunityArticle params={params} />
+    </Suspense>
+  );
+}
+
+async function OpportunityArticle({ params }: { params: Promise<{ slug: string }> }) {
   await connection();
+  const { slug } = await params;
   const item = await loadOpportunity(slug);
   if (!item) notFound();
   const expired = isExpired(item.deadline, new Date().toISOString().slice(0, 10));

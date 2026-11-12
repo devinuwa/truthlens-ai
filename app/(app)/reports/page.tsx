@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { getPublicSupabaseConfig } from "@/lib/env";
 import { listOwnedReports } from "@/lib/reports/repository";
 import { createUserClient } from "@/lib/supabase/server";
 
-export const instant = false;
 export const metadata = { title: "My reports" };
 
-export default async function ReportsPage() {
+export default function ReportsPage() {
   if (!getPublicSupabaseConfig()) {
     return (
       <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
@@ -19,6 +20,14 @@ export default async function ReportsPage() {
       </section>
     );
   }
+  return (
+    <Suspense fallback={<ContentFallback label="My reports" />}>
+      <ReportsContent />
+    </Suspense>
+  );
+}
+
+async function ReportsContent() {
   const user = await getOptionalUser();
   if (!user) redirect("/login?next=/reports");
   const supabase = await createUserClient();

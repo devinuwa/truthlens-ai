@@ -1,11 +1,30 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/auth-form";
 import { safeNext } from "@/lib/security/safe-redirect";
 
-export const instant = false;
 export const metadata = { title: "Sign in" };
 
-export default async function LoginPage({
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <main id="main" className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
+          <h1 className="text-3xl font-bold">Sign in</h1>
+          <p className="mt-2 text-sm text-muted">Loading the form…</p>
+        </main>
+      }
+    >
+      <LoginContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function LoginContent({
   searchParams,
 }: {
   searchParams: Promise<{ next?: string; error?: string }>;

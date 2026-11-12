@@ -1,28 +1,41 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { MessageChecker } from "@/components/analysis/message-checker";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { UrlChecker } from "@/components/analysis/url-checker";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { loadQuizAttempts } from "@/lib/academy/attempts";
+import { getLesson } from "@/lib/academy/lessons";
+import { buildCourseProgress, passRatio } from "@/lib/academy/progress";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { tipForDate } from "@/lib/content/tips";
-import { LESSONS } from "@/lib/academy/lessons";
 import { loadOpportunities } from "@/lib/opportunities/repository";
 import { isExpired } from "@/lib/opportunities/types";
 import { listOwnedReports } from "@/lib/reports/repository";
 import { createUserClient } from "@/lib/supabase/server";
 
-export const instant = false;
 export const metadata = { title: "Home" };
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<ContentFallback label="Home" />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+async function DashboardContent() {
   await connection();
   const user = await getOptionalUser();
   const today = new Date().toISOString().slice(0, 10);
   const tip = tipForDate(new Date());
   const opportunities = await loadOpportunities();
   const recommended = opportunities.opportunities.filter((item) => !isExpired(item.deadline, today)).slice(0, 2);
-  const lesson = LESSONS[0];
+  const { records, ratio } = user ? await loadQuizAttempts() : { records: [], ratio: passRatio() };
+  const nextLesson = buildCourseProgress(records, ratio).next;
+  const lesson = nextLesson ? getLesson(nextLesson.slug) : undefined;
   let reports: { id: string; label: string; assessmentLabel: string }[] = [];
   if (user) {
     const supabase = await createUserClient();
@@ -87,7 +100,7 @@ export default async function DashboardPage() {
           )}
         </Card>
         <Card>
-          <h2 className="font-bold">Opportunities to practise with</h2>
+          <h2 className="font-bold">Open opportunities</h2>
           {recommended.length === 0 ? (
             <p className="mt-2 text-sm text-muted">No open records are loaded. The opportunities page explains how to show the demonstration set.</p>
           ) : (
@@ -105,11 +118,22 @@ export default async function DashboardPage() {
         </Card>
         <Card className="bg-sky/15">
           <h2 className="font-bold">Digital Safety Academy</h2>
-          <p className="mt-2 text-sm">{lesson.title}</p>
-          <p className="mt-1 text-sm text-muted">{lesson.summary}</p>
-          <Link href={`/academy/${lesson.slug}`} className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">
-            Start lesson
-          </Link>
+          {lesson ? (
+            <>
+              <p className="mt-2 text-sm">{lesson.title}</p>
+              <p className="mt-1 text-sm text-muted">{lesson.summary}</p>
+              <Link href={`/academy/${lesson.slug}`} className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">
+                Start lesson
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="mt-2 text-sm">You have passed every lesson on the path.</p>
+              <Link href="/academy" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">
+                Review the path
+              </Link>
+            </>
+          )}
         </Card>
       </div>
     </div>

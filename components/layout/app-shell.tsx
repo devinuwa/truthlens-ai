@@ -9,16 +9,15 @@ import {
   GraduationCap,
   House,
   Link2,
-  LogOut,
   Menu,
   Search,
   Settings,
-  UserRound,
   X,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 import { BrandLink } from "@/components/brand/mark";
-import type { SessionUser } from "@/lib/auth/current-user";
+import { ContentFallback } from "@/components/layout/content-fallback";
 import { cn } from "@/lib/cn";
 
 const items = [
@@ -32,14 +31,51 @@ const items = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function AppShell({ user, children }: { user: SessionUser | null; children: ReactNode }) {
+export function AppShell({
+  account,
+  mobileAccount,
+  children,
+}: {
+  account: ReactNode;
+  mobileAccount: ReactNode;
+  children: ReactNode;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+
+  useEffect(() => {
+    setPendingPath(null);
+    setShowSkeleton(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!pendingPath) return;
+    const timer = window.setTimeout(() => setShowSkeleton(true), 120);
+    return () => window.clearTimeout(timer);
+  }, [pendingPath]);
+
+  function onClickCapture(event: MouseEvent<HTMLDivElement>) {
+    if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+    const anchor = (event.target as HTMLElement).closest("a");
+    if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+    const href = anchor.getAttribute("href");
+    if (!href || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("#")) return;
+    const path = href.split(/[?#]/)[0] || "/";
+    if (path === pathname) return;
+    flushSync(() => {
+      setPendingPath(path);
+    });
+  }
+
+  const currentPath = pendingPath ?? pathname;
+  const pendingLabel = items.find((item) => currentPath === item.href || currentPath.startsWith(`${item.href}/`))?.label;
 
   const nav = (
     <nav aria-label="Main" className="flex flex-1 flex-col gap-1">
       {items.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const active = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
         const Icon = item.icon;
         return (
           <Link
@@ -48,8 +84,8 @@ export function AppShell({ user, children }: { user: SessionUser | null; childre
             aria-current={active ? "page" : undefined}
             onClick={() => setOpen(false)}
             className={cn(
-              "flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold",
-              active ? "bg-primary text-white" : "text-ink hover:bg-canvas",
+              "flex min-h-11 items-center gap-3 rounded-full px-3 text-sm font-bold",
+              active ? "bg-ink text-white" : "text-ink hover:bg-lilac",
             )}
           >
             <Icon aria-hidden="true" size={18} />
@@ -61,20 +97,20 @@ export function AppShell({ user, children }: { user: SessionUser | null; childre
   );
 
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[280px_1fr]">
-      <aside className="hidden border-r border-ink/5 bg-card md:flex md:min-h-screen md:flex-col md:p-4">
+    <div className="min-h-screen md:grid md:grid-cols-[280px_1fr]" onClickCapture={onClickCapture}>
+      <aside className="hidden bg-white md:flex md:min-h-screen md:flex-col md:p-5">
         <div className="px-2 py-2">
           <BrandLink />
         </div>
         <div className="mt-6 flex flex-1 flex-col">{nav}</div>
-        <AccountFooter user={user} />
+        {account}
       </aside>
       <div className="flex min-h-screen flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-ink/5 bg-card/95 px-4 py-3 backdrop-blur md:hidden">
+        <header className="sticky top-0 z-20 flex items-center justify-between bg-white/80 px-4 py-3 backdrop-blur md:hidden">
           <BrandLink />
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-canvas"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-lilac"
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((value) => !value)}
@@ -84,44 +120,21 @@ export function AppShell({ user, children }: { user: SessionUser | null; childre
           </button>
         </header>
         {open ? (
-          <div id="mobile-nav" className="border-b border-ink/5 bg-card px-4 py-4 md:hidden">
+          <div id="mobile-nav" className="bg-white px-4 py-4 md:hidden">
             {nav}
-            <div className="mt-4">
-              <AccountFooter user={user} />
-            </div>
+            <div className="mt-4">{mobileAccount}</div>
           </div>
         ) : null}
-        <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
-          {children}
+        {pendingPath ? (
+          <div className="h-1 w-full bg-primary/15" role="progressbar" aria-valuetext="Loading the next page">
+            <div className="h-full w-1/2 animate-pulse bg-primary" />
+          </div>
+        ) : null}
+        <main id="main" aria-busy={pendingPath ? true : undefined} className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
+          {showSkeleton ? <ContentFallback label={pendingLabel ?? "Loading"} /> : children}
         </main>
       </div>
     </div>
   );
 }
 
-function AccountFooter({ user }: { user: SessionUser | null }) {
-  if (!user) {
-    return (
-      <div className="rounded-2xl bg-canvas p-3 text-sm">
-        <p className="flex items-center gap-2 font-semibold">
-          <UserRound aria-hidden="true" size={16} /> Guest mode
-        </p>
-        <p className="mt-1 text-muted">You can try the checks. Sign in to save reports.</p>
-        <Link href="/login" className="mt-2 inline-flex min-h-11 items-center font-semibold text-primary">
-          Sign in
-        </Link>
-      </div>
-    );
-  }
-  return (
-    <div className="rounded-2xl bg-canvas p-3 text-sm">
-      <p className="font-semibold">{user.displayName}</p>
-      <p className="truncate text-muted">{user.email}</p>
-      <form action="/auth/signout" method="post">
-        <button type="submit" className="mt-2 inline-flex min-h-11 items-center gap-2 font-semibold text-primary">
-          <LogOut aria-hidden="true" size={16} /> Sign out
-        </button>
-      </form>
-    </div>
-  );
-}

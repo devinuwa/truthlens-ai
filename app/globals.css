@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-canvas: #f7f7ff;
+  --color-canvas: #f7f4fb;
   --color-card: #ffffff;
-  --color-ink: #252343;
-  --color-muted: #6b6b85;
-  --color-primary: #6c5ce7;
-  --color-primary-dark: #5746d6;
-  --color-sky: #74c0fc;
+  --color-ink: #171717;
+  --color-muted: #5c5670;
+  --color-primary: #6d3aa8;
+  --color-primary-dark: #542f86;
+  --color-lilac: #efe4fb;
+  --color-sky: #d9c7f5;
   --color-teal: #20c997;
   --color-sun: #ffd166;
   --color-coral: #ff7f7f;
   --color-danger: #d9485f;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
@@ -22,8 +23,15 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid #6c5ce7;
+  outline: 3px solid #6d3aa8;
   outline-offset: 2px;
+}
+
+.hero-wash {
+  background:
+    linear-gradient(180deg, rgba(247, 244, 251, 0) 0%, rgba(247, 244, 251, 0) 72%, #f7f4fb 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.45) 0 22px, rgba(255, 255, 255, 0) 22px 44px),
+    linear-gradient(180deg, #efe4ff 0%, #f4ebff 48%, #f7f4fb 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
