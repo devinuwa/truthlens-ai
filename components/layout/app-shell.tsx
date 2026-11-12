@@ -14,7 +14,7 @@ import {
   Settings,
   X,
 } from "lucide-react";
-import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { BrandLink } from "@/components/brand/mark";
 import { ContentFallback } from "@/components/layout/content-fallback";
@@ -31,16 +31,31 @@ const items = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function AppShell({
-  account,
-  mobileAccount,
-  children,
-}: {
+type ShellProps = {
   account: ReactNode;
   mobileAccount: ReactNode;
   children: ReactNode;
-}) {
+};
+
+export function AppShell(props: ShellProps) {
+  return (
+    <Suspense fallback={<ShellFrame {...props} pathname={null} />}>
+      <ShellWithPath {...props} />
+    </Suspense>
+  );
+}
+
+function ShellWithPath(props: ShellProps) {
   const pathname = usePathname();
+  return <ShellFrame {...props} pathname={pathname} />;
+}
+
+function ShellFrame({
+  account,
+  mobileAccount,
+  children,
+  pathname,
+}: ShellProps & { pathname: string | null }) {
   const [open, setOpen] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showSkeleton, setShowSkeleton] = useState(false);
@@ -70,12 +85,14 @@ export function AppShell({
   }
 
   const currentPath = pendingPath ?? pathname;
-  const pendingLabel = items.find((item) => currentPath === item.href || currentPath.startsWith(`${item.href}/`))?.label;
+  const pendingLabel = currentPath
+    ? items.find((item) => currentPath === item.href || currentPath.startsWith(`${item.href}/`))?.label
+    : undefined;
 
   const nav = (
     <nav aria-label="Main" className="flex flex-1 flex-col gap-1">
       {items.map((item) => {
-        const active = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
+        const active = currentPath === item.href || (currentPath?.startsWith(`${item.href}/`) ?? false);
         const Icon = item.icon;
         return (
           <Link
