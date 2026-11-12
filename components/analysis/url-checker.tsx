@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ResultPanel } from "@/components/analysis/result-panel";
 import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/analysis/types";
+import { checkUnreachable } from "@/lib/pwa/offline-copy";
 
 export function UrlChecker({ signedIn }: { signedIn: boolean }) {
   const [url, setUrl] = useState("");
@@ -29,7 +30,7 @@ export function UrlChecker({ signedIn }: { signedIn: boolean }) {
       }
       setResult(payload);
     } catch {
-      setError("The check could not reach the server. Try again.");
+      setError(checkUnreachable("Try again."));
     } finally {
       setLoading(false);
     }

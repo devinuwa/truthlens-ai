@@ -24,9 +24,9 @@ export function LearningPath({ progress, signedIn }: { progress: CourseProgress;
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className="order-2 lg:order-1">
         <p className="text-sm font-semibold text-primary">Digital Safety Academy</p>
-        <h1 className="mt-1 text-3xl font-bold">Your Digital Safety Learning Path</h1>
+        <h2 className="mt-1 text-3xl font-bold">Quiz path</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-          Work through the lessons in order. Pass a quiz at {passPercent}% to open the next one. The lessons explain warning signs. They do not replace a trusted adult when something feels serious.
+          The reading above stays open. This path is the practice. Pass a quiz at {passPercent}% to open the next quiz. A pass is practice with these examples. It is not a promise that every later message is safe.
         </p>
         <div className="mt-5 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
           <div className="flex items-end justify-between gap-3">

@@ -7,7 +7,21 @@ export type ChapterDefinition = {
   lessonSlugs: string[];
 };
 
-/** Existing lessons, grouped. No new lesson text is invented here. */
+/** Reading comes before the quiz path. These lessons stay open, including offline. */
+export const INTRO_CHAPTER: ChapterDefinition = {
+  slug: "cyber-intro",
+  title: "Intro to cybersecurity",
+  description: "What cybersecurity means, and the first habits that lower risk on a phone, a network, and an account.",
+  lessonSlugs: [
+    "what-cybersecurity-means",
+    "devices-and-updates",
+    "harmful-software",
+    "shared-networks",
+    "when-something-goes-wrong",
+  ],
+};
+
+/** Quiz path. A saved pass still opens the next lesson in this list. */
 export const CHAPTERS: ChapterDefinition[] = [
   {
     slug: "online-threats",
@@ -68,8 +82,20 @@ export function orderedSlugs(): string[] {
   return CHAPTERS.flatMap((chapter) => chapter.lessonSlugs);
 }
 
+export function isIntroLesson(slug: string): boolean {
+  return INTRO_CHAPTER.lessonSlugs.includes(slug);
+}
+
+export function readingChapters(): ChapterDefinition[] {
+  return [INTRO_CHAPTER, ...CHAPTERS];
+}
+
+export function readingSlugs(): string[] {
+  return readingChapters().flatMap((chapter) => chapter.lessonSlugs);
+}
+
 export function chapterForSlug(slug: string): ChapterDefinition | undefined {
-  return CHAPTERS.find((chapter) => chapter.lessonSlugs.includes(slug));
+  return readingChapters().find((chapter) => chapter.lessonSlugs.includes(slug));
 }
 
 export function toPublicLesson(lesson: Lesson): PublicLesson {
@@ -95,7 +121,7 @@ export function lessonAt(slug: string): Lesson | undefined {
 }
 
 export function neighbourSlugs(slug: string): { previous: string | null; next: string | null } {
-  const order = orderedSlugs();
+  const order = isIntroLesson(slug) ? INTRO_CHAPTER.lessonSlugs : orderedSlugs();
   const index = order.indexOf(slug);
   if (index < 0) return { previous: null, next: null };
   return {

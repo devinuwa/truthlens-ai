@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { curriculumLessons, everyListedLessonIsReal, orderedSlugs, toPublicLesson } from "@/lib/academy/curriculum";
+import { curriculumLessons, everyListedLessonIsReal, INTRO_CHAPTER, isIntroLesson, orderedSlugs, readingSlugs, toPublicLesson } from "@/lib/academy/curriculum";
 import { getLesson, scoreQuiz } from "@/lib/academy/lessons";
 import {
   buildCourseProgress,
@@ -24,6 +24,14 @@ describe("academy quiz gate", () => {
   it("uses the existing lessons and hides the answer key from the public lesson", () => {
     expect(everyListedLessonIsReal()).toBe(true);
     expect(orderedSlugs()).toHaveLength(8);
+    expect(readingSlugs()).toHaveLength(13);
+    expect(isIntroLesson("what-cybersecurity-means")).toBe(true);
+    expect(isIntroLesson("pressure-tactics")).toBe(false);
+    for (const slug of INTRO_CHAPTER.lessonSlugs) {
+      const intro = getLesson(slug);
+      expect(intro?.questions).toHaveLength(3);
+      expect(JSON.stringify(toPublicLesson(intro!))).not.toContain("correctIndex");
+    }
     const lesson = getLesson("spotting-phishing");
     expect(lesson).toBeTruthy();
     if (!lesson) return;

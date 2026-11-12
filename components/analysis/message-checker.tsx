@@ -10,6 +10,7 @@ import {
   type FollowUpId,
   type MessageCategory,
 } from "@/lib/analysis/types";
+import { checkUnreachable } from "@/lib/pwa/offline-copy";
 
 const labels: Record<MessageCategory, string> = {
   auto: "Check everything",
@@ -92,7 +93,7 @@ export function MessageChecker({
       const aborted = caught instanceof DOMException && caught.name === "AbortError";
       setError(aborted
         ? "The check took too long. Your message is still in the box. Try again."
-        : "The check could not reach the server. Your message is still in the box. Try again.");
+        : checkUnreachable("Your message is still in the box. Try again."));
     } finally {
       window.clearTimeout(timer);
       setLoading(false);

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadQuizAttempts } from "@/lib/academy/attempts";
 import { getLesson } from "@/lib/academy/lessons";
-import { neighbourSlugs } from "@/lib/academy/curriculum";
+import { isIntroLesson, neighbourSlugs } from "@/lib/academy/curriculum";
 import { canAccessLesson, isPassingScore, passRatio } from "@/lib/academy/progress";
 import { getOptionalUser } from "@/lib/auth/current-user";
 import { createUserClient } from "@/lib/supabase/server";
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   const user = await getOptionalUser();
   const { records, ratio } = user ? await loadQuizAttempts() : { records: [], ratio: passRatio() };
-  if (!canAccessLesson(lesson.slug, records, ratio)) {
+  if (!isIntroLesson(lesson.slug) && !canAccessLesson(lesson.slug, records, ratio)) {
     return NextResponse.json({ error: "This lesson is still locked. Pass the previous quiz first." }, { status: 403 });
   }
 
@@ -83,6 +83,19 @@ export async function POST(request: Request) {
   }
 
   if (!missingQuizFunction(rpc.error.message, rpc.error.code)) {
+    if (rpc.error.message.toLowerCase().includes("unknown lesson")) {
+      return NextResponse.json({
+        score,
+        total,
+        passed,
+        correct,
+        explanations,
+        stored: false,
+        note: "This score is shown here. It is not saved on the account yet.",
+        nextSlug: null,
+        nextTitle: null,
+      });
+    }
     if (rpc.error.message.toLowerCase().includes("locked")) {
       return NextResponse.json({ error: "This lesson is still locked. Pass the previous quiz first." }, { status: 403 });
     }

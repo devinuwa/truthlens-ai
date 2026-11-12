@@ -160,7 +160,7 @@ export default function HomePage() {
       <section className="mt-20 rounded-3xl bg-white p-6 shadow-sm shadow-[0_18px_50px_-32px_rgba(80,40,120,0.55)] sm:p-8" aria-labelledby="academy-heading">
         <h2 id="academy-heading" className="text-4xl font-extrabold tracking-tight">Digital Safety Academy</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6">
-          Short lessons on pressure, phishing, passwords, scholarship and job scams, social media, and what to keep private. The first lesson is open. The next one opens after a signed-in quiz is passed.
+          An introduction to cybersecurity: devices, harmful software, public networks, phishing, passwords, and what to do when something goes wrong. The reading stays on the device after you open the Academy once. A quiz score needs a connection.
         </p>
         <ButtonLink href="/academy" className="mt-5">Open the Academy</ButtonLink>
       </section>

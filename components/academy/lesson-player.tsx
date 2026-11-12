@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { PublicLesson } from "@/lib/academy/curriculum";
+import { checkUnreachable } from "@/lib/pwa/offline-copy";
 
 type Feedback = {
   score: number;
@@ -22,12 +23,14 @@ export function LessonPlayer({
   lesson,
   signedIn,
   passPercent,
+  practiceOnly = false,
   previous,
   nextLockedTitle,
 }: {
   lesson: PublicLesson;
   signedIn: boolean;
   passPercent: number;
+  practiceOnly?: boolean;
   previous: { slug: string; title: string } | null;
   nextLockedTitle: string | null;
 }) {
@@ -57,6 +60,8 @@ export function LessonPlayer({
       }
       setFeedback(payload);
       if (payload.stored) router.refresh();
+    } catch {
+      setNote(checkUnreachable("Your answers are still selected."));
     } finally {
       setBusy(false);
     }
@@ -98,7 +103,11 @@ export function LessonPlayer({
       </a>
       <section id="quiz" className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
         <h2 className="text-xl font-bold">Quiz</h2>
-        <p className="mt-2 text-sm text-muted">A score of {passPercent}% opens the next lesson. You can try again if you miss it.</p>
+        <p className="mt-2 text-sm text-muted">
+          {practiceOnly
+            ? "This quiz is practice for the introduction. You can read the other lessons either way. Marking it needs a connection."
+            : `A score of ${passPercent}% opens the next quiz. You can try again if you miss it. Marking it needs a connection.`}
+        </p>
         <ol className="mt-4 space-y-5">
           {lesson.questions.map((question, questionIndex) => (
             <li key={question.prompt}>

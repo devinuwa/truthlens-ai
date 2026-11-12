@@ -6,6 +6,7 @@ import { ResultPanel } from "@/components/analysis/result-panel";
 import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { BANK_OTP_EXAMPLE } from "@/lib/content/demo-message";
+import { checkUnreachable } from "@/lib/pwa/offline-copy";
 import { clientUploadIssue } from "@/lib/uploads/files";
 
 const SCHOLARSHIP_EXAMPLE =
@@ -99,7 +100,7 @@ export function LandingChecker({
       setResult(payload);
     } catch (caught) {
       const aborted = caught instanceof DOMException && caught.name === "AbortError";
-      setError(aborted ? "The check took too long. You can try again." : "The check could not reach the server. You can try again.");
+      setError(aborted ? "The check took too long. You can try again." : checkUnreachable("You can try again."));
     } finally {
       window.clearTimeout(timer);
       setLoading(false);

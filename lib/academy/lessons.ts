@@ -16,6 +16,246 @@ export type Lesson = {
 
 export const LESSONS: Lesson[] = [
   {
+    slug: "what-cybersecurity-means",
+    title: "What cybersecurity means",
+    minutes: 4,
+    summary: "Cybersecurity is how you protect devices, accounts, and messages. It lowers risk. It is not a promise that nothing can go wrong.",
+    sections: [
+      {
+        heading: "Three ideas, in plain words",
+        paragraphs: [
+          "Cybersecurity is the work of keeping your phone, your accounts, and your messages away from people who should not have them, and of keeping those things working.",
+          "Private means only the right people can see it. Intact means nobody quietly changes it. Available means you can still open it when you need it. A scam, a stolen password, and a phone that will not turn on are three different failures of those ideas.",
+        ],
+      },
+      {
+        heading: "Tips reduce risk",
+        paragraphs: [
+          "The lessons in this Academy are an introduction. They show patterns that often cause harm, and a next step you can take.",
+          "Following a tip does not make a phone, a website, or a message completely safe. A quiet result still does not prove who sent something.",
+        ],
+      },
+    ],
+    questions: [
+      {
+        prompt: "Which of these is a cybersecurity concern?",
+        choices: ["Your favourite colour", "Someone asking you to send your password", "A reminder to bring a notebook"],
+        correctIndex: 1,
+        explanation: "A password is a key to an account. A favourite colour and a notebook reminder are not.",
+      },
+      {
+        prompt: "If you follow every tip in this Academy, nothing bad can happen online.",
+        choices: ["True", "False"],
+        correctIndex: 1,
+        explanation: "The lessons lower risk. They are not a guarantee.",
+      },
+      {
+        prompt: "In this lesson, what does private mean?",
+        choices: [
+          "Only the people who should see the information can see it",
+          "The information is posted for the whole school",
+          "The information is deleted every night",
+        ],
+        correctIndex: 0,
+        explanation: "Private means the wrong person does not get to read it.",
+      },
+    ],
+  },
+  {
+    slug: "devices-and-updates",
+    title: "Devices, locks, and updates",
+    minutes: 4,
+    summary: "A lock screen and an update are basic protection for the phone or computer you already use.",
+    sections: [
+      {
+        heading: "The lock is the front door",
+        paragraphs: [
+          "A lock screen stops someone who picks up your phone from opening your chats, photos, and saved passwords. Use a code you do not share.",
+          "If you hand the phone over, lock it first or stay while the other person uses it. An unlocked phone is an open door.",
+        ],
+      },
+      {
+        heading: "Updates close known holes",
+        paragraphs: [
+          "Phone and computer makers publish updates when they learn of a hole other people can use. Leaving the update for a long time leaves that hole open.",
+          "Install apps from the store you already use. A file sent in a chat, especially one that promises a prize or free followers, is a common way to put a harmful program on a phone.",
+        ],
+        example: "“Install this file to claim your airtime.”",
+      },
+    ],
+    questions: [
+      {
+        prompt: "A classmate asks to borrow your phone. What is the safer habit?",
+        choices: [
+          "Hand it over while it is unlocked and walk away",
+          "Lock it first, or stay with them while they use it",
+          "Turn off all future updates so the phone stays the same",
+        ],
+        correctIndex: 1,
+        explanation: "An unlocked phone shows your chats and accounts. Stay, or lock it.",
+      },
+      {
+        prompt: "An update can wait forever because the phone already works.",
+        choices: ["True", "False"],
+        correctIndex: 1,
+        explanation: "The phone can work and still have a hole that an update would close.",
+      },
+      {
+        prompt: "A chat sends a file and calls it a free game. What is the safer step?",
+        choices: [
+          "Install the file so you do not miss the game",
+          "Do not install a program that arrived in a chat",
+          "Forward the file to your classmates first",
+        ],
+        correctIndex: 1,
+        explanation: "Use the store you already trust. A chat file can be something other than a game.",
+      },
+    ],
+  },
+  {
+    slug: "harmful-software",
+    title: "Harmful software",
+    minutes: 4,
+    summary: "Malware is a program that does something harmful you did not agree to.",
+    sections: [
+      {
+        heading: "What it tries to do",
+        paragraphs: [
+          "Harmful software can watch what you type, lock your photos until you pay, or show a page that looks like your bank. People call this malware.",
+          "It often arrives as a cracked app, a tool that promises free followers, or an attachment you were not expecting. The name of the file can say “invoice” or “photo” and still be a program.",
+        ],
+      },
+      {
+        heading: "What to do if you already opened it",
+        paragraphs: [
+          "Stop typing passwords into that app. Tell a trusted adult. Use the removal steps from the phone maker or the store you installed it from, if you can find those steps yourself.",
+          "Deleting the icon you can see does not always remove the program. A scan is not a promise that the device is clean.",
+        ],
+      },
+    ],
+    questions: [
+      {
+        prompt: "Which download is the safer place to get a game?",
+        choices: ["A file named free-followers from a stranger", "The store you already use for your other apps", "An attachment you were not expecting"],
+        correctIndex: 1,
+        explanation: "The store you already use is a smaller risk than a file from a stranger.",
+      },
+      {
+        prompt: "A file named invoice cannot be harmful.",
+        choices: ["True", "False"],
+        correctIndex: 1,
+        explanation: "The name is chosen by the sender. It does not tell you what the file will do.",
+      },
+      {
+        prompt: "You installed something that now asks for your bank password. What is the first useful step?",
+        choices: [
+          "Type the password so the app will close",
+          "Stop, and tell a trusted adult before you type any password into it",
+          "Post the password so friends can check the app for you",
+        ],
+        correctIndex: 1,
+        explanation: "Do not feed a password to a program you do not trust. Get a person who can help.",
+      },
+    ],
+  },
+  {
+    slug: "shared-networks",
+    title: "Shared and public networks",
+    minutes: 4,
+    summary: "A Wi-Fi name can be copied. A padlock on a website is not proof of who owns the site.",
+    sections: [
+      {
+        heading: "The name of the network is a label",
+        paragraphs: [
+          "Anyone nearby can create a network and give it a familiar name, such as the name of a cafe or a school. The name is not proof of who is running it.",
+          "On a network you do not know, avoid signing in to a bank or typing a password if you can wait. Mobile data, or the Wi-Fi at home, is a calmer place for that.",
+        ],
+        example: "A network named Free-School-WiFi appears while you are not at school.",
+      },
+      {
+        heading: "The padlock is about the connection",
+        paragraphs: [
+          "A lock icon in the address bar means the connection to that site is encrypted, so people on the same network have a harder time reading it.",
+          "The lock does not mean the site is the real bank, school, or shop. The address can still be a copy.",
+        ],
+      },
+    ],
+    questions: [
+      {
+        prompt: "A cafe network uses the cafe’s name. Does that prove the cafe is running it?",
+        choices: ["Yes, the name is proof", "No. Someone else can copy the name", "Yes, if the signal is strong"],
+        correctIndex: 1,
+        explanation: "The name is a label. It can be copied.",
+      },
+      {
+        prompt: "A padlock in the address bar means the site is definitely the real bank.",
+        choices: ["True", "False"],
+        correctIndex: 1,
+        explanation: "The padlock describes the connection. It does not identify the owner of the site.",
+      },
+      {
+        prompt: "You want to check a bank balance on a free network you do not know. What is the safer habit?",
+        choices: [
+          "Type the password now so you do not forget",
+          "Wait for mobile data or a network you know",
+          "Ask the nearest stranger if the network is safe",
+        ],
+        correctIndex: 1,
+        explanation: "A bank sign-in can wait. Use a network you already trust.",
+      },
+    ],
+  },
+  {
+    slug: "when-something-goes-wrong",
+    title: "When something goes wrong",
+    minutes: 4,
+    summary: "If you shared a secret or sent money, tell a trusted adult and use the official channel. You are not to blame for being tricked.",
+    sections: [
+      {
+        heading: "You can still act",
+        paragraphs: [
+          "Tell a trusted adult. Hiding the mistake gives the other person more time. You are not in trouble for being pressured or tricked.",
+          "If you shared a password or a one-time code, change the password from the official app or from a bookmark you already use. If the site lets you sign out other sessions, use that.",
+        ],
+      },
+      {
+        heading: "Money and messages",
+        paragraphs: [
+          "If money has already left the account, contact the bank or the mobile-money service through the number on the card or inside the official app. Keep the message so you can show what happened.",
+          "TruthLens can point at warning signs in the wording. It cannot reverse a payment or prove who sent the message.",
+        ],
+      },
+    ],
+    questions: [
+      {
+        prompt: "You typed a password into a page that arrived in a chat. What is the useful first step?",
+        choices: [
+          "Reply to the chat and ask them to delete it",
+          "Change the password from the official app or a bookmark you already use",
+          "Post the password so friends know to avoid that page",
+        ],
+        correctIndex: 1,
+        explanation: "Change the key from a place you already trust. Do not send it out again.",
+      },
+      {
+        prompt: "You should hide the mistake so nobody is disappointed.",
+        choices: ["True", "False"],
+        correctIndex: 1,
+        explanation: "Tell a trusted adult. Hiding it helps the person who tricked you.",
+      },
+      {
+        prompt: "Money has already left your account. What helps?",
+        choices: [
+          "Send more money so they will return the first amount",
+          "Contact the bank through its own number or app, and keep the message",
+          "Delete the chat so there is no record",
+        ],
+        correctIndex: 1,
+        explanation: "Use the bank’s own channel. Keep the message. Do not send more.",
+      },
+    ],
+  },
+  {
     slug: "spotting-phishing",
     title: "Spotting phishing messages",
     minutes: 4,

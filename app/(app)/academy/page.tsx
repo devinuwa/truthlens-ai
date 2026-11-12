@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { KnowledgeBase } from "@/components/academy/knowledge-base";
 import { LearningPath } from "@/components/academy/learning-path";
 import { ContentFallback } from "@/components/layout/content-fallback";
 import { loadQuizAttempts } from "@/lib/academy/attempts";
@@ -9,9 +10,12 @@ export const metadata = { title: "Digital Safety Academy" };
 
 export default function AcademyPage() {
   return (
-    <Suspense fallback={<ContentFallback label="Digital Safety Academy" />}>
-      <AcademyContent />
-    </Suspense>
+    <div className="space-y-10">
+      <KnowledgeBase />
+      <Suspense fallback={<ContentFallback label="Your progress" />}>
+        <AcademyContent />
+      </Suspense>
+    </div>
   );
 }
 

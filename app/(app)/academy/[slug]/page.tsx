@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { LessonPlayer } from "@/components/academy/lesson-player";
 import { ContentFallback } from "@/components/layout/content-fallback";
 import { loadQuizAttempts } from "@/lib/academy/attempts";
-import { neighbourSlugs, orderedSlugs, toPublicLesson } from "@/lib/academy/curriculum";
+import { isIntroLesson, neighbourSlugs, readingSlugs, toPublicLesson } from "@/lib/academy/curriculum";
 import { getLesson } from "@/lib/academy/lessons";
 import { canAccessLesson, passRatio } from "@/lib/academy/progress";
 import { getOptionalUser } from "@/lib/auth/current-user";
 
 export function generateStaticParams() {
-  return orderedSlugs().map((slug) => ({ slug }));
+  return readingSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,7 +35,8 @@ async function LessonContent({ params }: { params: Promise<{ slug: string }> }) 
   const neighbours = neighbourSlugs(slug);
   const previous = neighbours.previous ? getLesson(neighbours.previous) : undefined;
   const next = neighbours.next ? getLesson(neighbours.next) : undefined;
-  const unlocked = canAccessLesson(slug, records, ratio);
+  const intro = isIntroLesson(slug);
+  const unlocked = intro || canAccessLesson(slug, records, ratio);
 
   if (!unlocked) {
     return (
@@ -68,7 +69,7 @@ async function LessonContent({ params }: { params: Promise<{ slug: string }> }) 
   }
 
   const publicLesson = toPublicLesson(lesson);
-  const nextOpen = next ? canAccessLesson(next.slug, records, ratio) : false;
+  const nextOpen = next ? intro || isIntroLesson(next.slug) || canAccessLesson(next.slug, records, ratio) : false;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -97,6 +98,7 @@ async function LessonContent({ params }: { params: Promise<{ slug: string }> }) 
           lesson={publicLesson}
           signedIn={Boolean(user)}
           passPercent={Math.round(ratio * 100)}
+          practiceOnly={intro}
           previous={previous ? { slug: previous.slug, title: previous.title } : null}
           nextLockedTitle={next && !nextOpen ? next.title : null}
         />
